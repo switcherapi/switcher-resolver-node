@@ -1,14 +1,4 @@
-import { Switcher } from 'switcher-client';
 import Logger from '../helpers/logger';
-
-export class NotFoundError extends Error {
-    constructor(message) {
-        super(message);
-        this.name = this.constructor.name;
-        this.code = 404;
-        Error.captureStackTrace(this, this.constructor);
-    }
-}
 
 export class BadRequestError extends Error {
     constructor(message) {
@@ -17,14 +7,6 @@ export class BadRequestError extends Error {
         this.code = 400;
         Error.captureStackTrace(this, this.constructor);
     }
-}
-
-export function responseException(res, err, code, feature = undefined) {
-    if (feature) {
-        Logger.info(`Feature [${feature}]`, { log: Switcher.getLogger(feature) });
-    }
-
-    responseExceptionSilent(res, err, code, err.message);
 }
 
 export function responseExceptionSilent(res, err, code, message) {

@@ -1,9 +1,7 @@
 import Component from '../models/component';
-import { response } from './common';
 
 export async function getComponentById(id) {
-    let component = await Component.findById(id).exec();
-    return response(component, 'Component not found');
+    return Component.findById(id).exec();
 }
 
 export async function getComponents(where, projection, options) {
