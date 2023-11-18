@@ -84,35 +84,35 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: trackerforce/switcher-resolver-node:latest 
 
-  # update-kustomize:
-  #   name: Deploy
-  #   needs: [ docker ]
-  #   runs-on: ubuntu-latest
+  update-kustomize:
+    name: Deploy
+    needs: [ docker ]
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v3
-  #       with:
-  #         ref: 'master'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: 'master'
 
-  #     - name: Checkout Kustomize
-  #       uses: actions/checkout@v3
-  #       with:
-  #         token: ${{ secrets.ARGOCD_PAT }}
-  #         repository: switcherapi/switcher-deployment
-  #         ref: master
+      - name: Checkout Kustomize
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.ARGOCD_PAT }}
+          repository: switcherapi/switcher-deployment
+          ref: master
 
-  #     - name: Set Image
-  #       uses: stefanprodan/kube-tools@v1
-  #       with:
-  #         kubectl: 1.24.0
-  #         kustomize: 4.5.4
-  #         command: |
-  #           cd switcher-resolver-node/base
-  #           echo RELEASE_TIME=`date` > environment-properties.env
-  #           kustomize edit set image trackerforce/switcher-resolver-node:latest=trackerforce/switcher-resolver-node@${{ needs.docker.outputs.digest }}
-  #           git config --global user.email "${{ github.actor }}@users.noreply.github.com"
-  #           git config --global user.name "${{ github.actor }}"
-  #           git add .
-  #           git commit -m "[argocd] switcher-resolver-node: ${{ needs.docker.outputs.digest }}"
-  #           git push
+      - name: Set Image
+        uses: stefanprodan/kube-tools@v1
+        with:
+          kubectl: 1.24.0
+          kustomize: 4.5.4
+          command: |
+            cd switcher-resolver-node/base
+            echo RELEASE_TIME=`date` > environment-properties.env
+            kustomize edit set image trackerforce/switcher-resolver-node:latest=trackerforce/switcher-resolver-node@${{ needs.docker.outputs.digest }}
+            git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+            git config --global user.name "${{ github.actor }}"
+            git add .
+            git commit -m "[argocd] switcher-resolver-node: ${{ needs.docker.outputs.digest }}"
+            git push
