@@ -74,21 +74,8 @@ export async function resolveGroupConfig(source, _id, name, activated, context) 
     return resolveComponentsFirst(source, context, groups);
 }
 
-export async function resolveDomain(_id, name, activated, context) {
-    const args = {};
-
-    if (_id) {
-        args._id = _id; 
-    } else if (context.domain) {
-        args._id = context.domain;
-    } 
-    
-    if (name && context.admin) {
-        args.name = name; 
-        args.owner = context.admin._id;
-    }
-    
-    let domain = await Domain.findOne({ ...args }).lean().exec();
+export async function resolveDomain(activated, context) {
+    let domain = await Domain.findOne({ _id: context.domain }).lean().exec();
     if (activated !== undefined) {
         if (domain.activated[context.environment] !== activated) {
             return null;

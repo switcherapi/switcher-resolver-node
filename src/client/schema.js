@@ -1,6 +1,5 @@
 import { GraphQLSchema, GraphQLObjectType, GraphQLString, GraphQLList, GraphQLBoolean, GraphQLNonNull } from 'graphql';
 import { domainType } from './configuration-type';
-import { EnvType } from '../models/environment';
 import { strategyInputType, criteriaType } from './criteria-type';
 import { resolveConfigByKey, resolveDomain } from './resolvers';
 
@@ -36,11 +35,7 @@ const queryType = new GraphQLObjectType({
                     type: GraphQLString
                 },
                 activated: {
-                    type: GraphQLBoolean,
-                    resolve: (source, _args, { environment }) => {
-                        return source.activated.get(environment) === undefined ? 
-                            source.activated.get(EnvType.DEFAULT) : source.activated.get(environment);
-                    }
+                    type: GraphQLBoolean
                 },
                 environment: {
                     type: GraphQLString
@@ -49,10 +44,10 @@ const queryType = new GraphQLObjectType({
                     type: GraphQLString
                 }
             },
-            resolve: async (_source, { _id, name, activated, environment, _component }, context) => {
+            resolve: async (_source, { activated, environment, _component }, context) => {
                 if (environment) context.environment = environment;
                 if (_component) context._component = _component;
-                return resolveDomain(_id, name, activated, context);
+                return resolveDomain(activated, context);
             }
         }
     }

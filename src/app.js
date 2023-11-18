@@ -1,4 +1,5 @@
 import express from 'express';
+import swaggerUi from 'swagger-ui-express';
 import { createHandler } from 'graphql-http/lib/use/express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -6,9 +7,10 @@ import helmet from 'helmet';
 require('./db/mongoose');
 
 import mongoose from 'mongoose';
+import swaggerDocument from './api-docs/swagger-document';
 import clientApiRouter from './routers/client-api';
 import schema from './client/schema';
-import { appAuth } from './middleware/auth';
+import { appAuth, resourcesAuth } from './middleware/auth';
 import { clientLimiter, defaultLimiter } from './middleware/limiter';
 import { createServer } from './app-server';
 
@@ -40,6 +42,15 @@ app.use('/graphql', appAuth, clientLimiter, handler);
 /**
  * API Docs and Health Check
  */
+
+app.use('/api-docs', resourcesAuth(),
+    swaggerUi.serve, 
+    swaggerUi.setup(swaggerDocument)
+);
+
+app.get('/swagger.json', resourcesAuth(), (_req, res) => {
+    res.status(200).send(swaggerDocument);
+});
 
 app.get('/check', defaultLimiter, (req, res) => {
     const showDetails = req.query.details === '1';
