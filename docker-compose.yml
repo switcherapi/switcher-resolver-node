@@ -1,0 +1,39 @@
+version: '3.8'
+
+networks:
+  backend:
+    driver: bridge
+
+services:
+  switcher_resolver_node:
+    image: trackerforce/switcher-resolver-node
+    container_name: switcher-resolver-node
+    ports:
+      - 3001:3001
+    networks:
+      - backend
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - ENV=${ENV}
+      - SSL_KEY=${SSL_KEY}
+      - SSL_CERT=${SSL_CERT}
+
+      - MONGODB_URI=${MONGODB_URI}
+      - RESOURCE_SECRET=${RESOURCE_SECRET}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_CLIENT_TOKEN_EXP_TIME=${JWT_CLIENT_TOKEN_EXP_TIME}
+      - RELAY_BYPASS_HTTPS=${RELAY_BYPASS_HTTPS}
+      - RELAY_BYPASS_VERIFICATION=${RELAY_BYPASS_VERIFICATION}
+      - METRICS_ACTIVATED=${METRICS_ACTIVATED}
+      - METRICS_MAX_PAGE=${METRICS_MAX_PAGE}
+      - REGEX_MAX_TIMEOUT=${REGEX_MAX_TIMEOUT}
+      - REGEX_MAX_BLACLIST=${REGEX_MAX_BLACLIST}
+      - MAX_REQUEST_PER_MINUTE=${MAX_REQUEST_PER_MINUTE}
+
+      - SWITCHER_API_LOGGER=${SWITCHER_API_LOGGER}
+      - SWITCHER_API_ENABLE=${SWITCHER_API_ENABLE}
+      - SWITCHER_API_URL=${SWITCHER_API_URL}
+      - SWITCHER_API_KEY=${SWITCHER_API_KEY}
+      - SWITCHER_API_DOMAIN=${SWITCHER_API_DOMAIN}
+      - SWITCHER_API_ENVIRONMENT=${SWITCHER_API_ENVIRONMENT}

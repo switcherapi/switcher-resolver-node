@@ -1,8 +1,18 @@
+import basicAuth from 'express-basic-auth';
 import jwt from 'jsonwebtoken';
 import { getComponentById } from '../services/component';
 import { responseExceptionSilent } from '../exceptions';
 import Component from '../models/component';
 import { getRateLimit } from '../external/switcher-api-facade';
+
+export function resourcesAuth() {
+    return basicAuth({
+        users: {
+            admin: process.env.RESOURCE_SECRET || 'admin',
+        },
+        challenge: true,
+    });
+}
 
 export async function appAuth(req, res, next) {
     try {

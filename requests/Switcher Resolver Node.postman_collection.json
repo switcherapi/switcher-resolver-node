@@ -1,0 +1,504 @@
+{
+	"info": {
+		"_postman_id": "2987131f-2c31-440d-8a8f-0f43f49483c3",
+		"name": "Switcher Resolver Node",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "9436108"
+	},
+	"item": [
+		{
+			"name": "REST",
+			"item": [
+				{
+					"name": "Auth component",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    pm.environment.set('authClientToken', pm.response.json().token)",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{apiKey}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "switcher-api-key",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"domain\": \"Playground\",\n\t\"component\": \"switcher-playground\",\n\t\"environment\": \"default\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/criteria/auth",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"criteria",
+								"auth"
+							],
+							"query": [
+								{
+									"key": "showReason",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "showStrategy",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "bypassMetric",
+									"value": "true",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Resolve criteria - with input",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authClientToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"entry\": [\n\t\t{\n\t\t\t\"strategy\": \"PAYLOAD_VALIDATION\",\n\t\t\t\"input\": \"{ \\\"status\\\": \\\"ready\\\" }\"\n\t\t}]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/criteria?showReason=true&showStrategy=true&key=MY_SWITCHER",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"criteria"
+							],
+							"query": [
+								{
+									"key": "showReason",
+									"value": "true"
+								},
+								{
+									"key": "showStrategy",
+									"value": "true"
+								},
+								{
+									"key": "bypassMetric",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "key",
+									"value": "MY_SWITCHER"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Resolve criteria",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authClientToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/criteria?key=MY_SWITCHER",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"criteria"
+							],
+							"query": [
+								{
+									"key": "showReason",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "showStrategy",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "bypassMetric",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "key",
+									"value": "MY_SWITCHER"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Snapshot",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authClientToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/criteria/snapshot_check/:version",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"criteria",
+								"snapshot_check",
+								":version"
+							],
+							"variable": [
+								{
+									"key": "version",
+									"value": "1588557288037"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Switchers",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authClientToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"switchers\": [\r\n        \"FEATURE2020\",\r\n        \"RELAY_1\"\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/criteria/switchers_check",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"criteria",
+								"switchers_check"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "GraphqQL",
+			"item": [
+				{
+					"name": "Resolve criteria - complex",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authClientToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "{\r\n  criteria(\r\n      key: \"MY_SWITCHER\",\r\n    #   bypassMetric: false,\r\n      entry: [\r\n              {\r\n                  strategy: \"VALUE_VALIDATION\", \r\n                  input: \"Roger\"\r\n              }\r\n            ]\r\n        ) {\r\n    key\r\n    activated\r\n    response {\r\n        result\r\n        reason\r\n        domain {\r\n            name\r\n            activated\r\n            description\r\n            group {\r\n                name\r\n                activated\r\n                description\r\n                config {\r\n                    key\r\n                    activated\r\n                    description\r\n                    strategies {\r\n                        strategy\r\n                        activated\r\n                        operation\r\n                        values\r\n                    }\r\n                }\r\n            }\r\n        }\r\n        group {\r\n            name\r\n            activated\r\n            description\r\n        }\r\n        strategies {\r\n            strategy\r\n            activated\r\n            operation\r\n            values\r\n        }\r\n    }\r\n  }\r\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "{{url}}/graphql",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Resolve criteria - simple",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authClientToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "{\r\n  criteria(\r\n      key: \"MY_SWITCHER\", \r\n      entry: [\r\n              {\r\n                  strategy: \"VALUE_VALIDATION\", \r\n                  input: \"Roger\"\r\n              },\r\n              {\r\n                  strategy: \"NETWORK_VALIDATION\", \r\n                  input: \"192.168.0.2\"\r\n              }\r\n            ]\r\n        ) {\r\n    response {\r\n        result\r\n        reason\r\n    }\r\n  }\r\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "{{url}}/graphql",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve Snapshot",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authClientToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "{\r\n    domain(activated: true) {\r\n        name\r\n        version\r\n        description\r\n        activated\r\n        group(activated: true) {\r\n            name\r\n            description\r\n            activated\r\n            config(activated: true) {\r\n                key\r\n                description\r\n                activated\r\n                strategies(activated: true) {\r\n                    strategy\r\n                    activated\r\n                    operation\r\n                    values\r\n                }\r\n                components\r\n            }\r\n        }\r\n    }\r\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "{{url}}/graphql",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "API Check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "Bearer",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{url}}/check",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"check"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{authToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
