@@ -6,7 +6,7 @@ import Admin from '../../src/models/admin';
 import Domain from '../../src/models/domain';
 import GroupConfig from '../../src/models/group-config';
 import { Config } from '../../src/models/config';
-import Component from '../../src/models/component';
+import Component, { EncryptionSalts } from '../../src/models/component';
 import { Metric } from '../../src/models/metric';
 import { EnvType, Environment } from '../../src/models/environment';
 import { ConfigStrategy, StrategiesType, OperationsType } from '../../src/models/config-strategy';
@@ -166,7 +166,7 @@ export const setupDatabase = async () => {
     await new Config(config2Document).save();
     await new ConfigStrategy(configStrategyDocument).save();
     
-    const hash = await bcryptjs.hash(component1Key, 8);
+    const hash = await bcryptjs.hash(component1Key, EncryptionSalts.COMPONENT);
     component1.apihash = hash;
     await new Component(component1).save();
 };
