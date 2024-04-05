@@ -54,6 +54,9 @@ export default {
                                     reason: {
                                         type: 'string'
                                     },
+                                    metadata: {
+                                        type: 'object'
+                                    },
                                     strategies: {
                                         type: 'array',
                                         items: configStrategy.ConfigStrategy
