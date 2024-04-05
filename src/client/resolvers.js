@@ -132,10 +132,11 @@ async function resolveRelay(config, environment, entry, response) {
                 resolveNotification(config.relay, entry, environment);
             } else {
                 const relayResponse = await resolveValidation(config.relay, entry, environment);
-
+                
                 response.result = relayResponse.result;
                 response.reason = relayResponse.result ? 'Success' : 'Relay does not agree';
                 response.message = relayResponse.message;
+                response.metadata = relayResponse.metadata;
             }
         }
     } catch (e) {
