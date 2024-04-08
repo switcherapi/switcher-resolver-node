@@ -1,9 +1,9 @@
 import basicAuth from 'express-basic-auth';
 import jwt from 'jsonwebtoken';
-import { getComponentById } from '../services/component';
-import { responseExceptionSilent } from '../exceptions';
-import Component from '../models/component';
-import { getRateLimit } from '../external/switcher-api-facade';
+import { getComponentById } from '../services/component.js';
+import { responseExceptionSilent } from '../exceptions/index.js';
+import Component from '../models/component.js';
+import { getRateLimit } from '../external/switcher-api-facade.js';
 
 export function resourcesAuth() {
     return basicAuth({

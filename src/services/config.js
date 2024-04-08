@@ -1,5 +1,5 @@
-import { Config } from '../models/config';
-import { BadRequestError } from '../exceptions';
+import { Config } from '../models/config.js';
+import { BadRequestError } from '../exceptions/index.js';
 
 export async function getConfig(where, lean = false) {
     const query = Config.findOne();

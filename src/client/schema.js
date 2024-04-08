@@ -1,7 +1,7 @@
 import { GraphQLSchema, GraphQLObjectType, GraphQLString, GraphQLList, GraphQLBoolean, GraphQLNonNull } from 'graphql';
-import { domainType } from './configuration-type';
-import { strategyInputType, criteriaType } from './criteria-type';
-import { resolveConfigByKey, resolveDomain } from './resolvers';
+import { domainType } from './configuration-type.js';
+import { strategyInputType, criteriaType } from './criteria-type.js';
+import { resolveConfigByKey, resolveDomain } from './resolvers.js';
 
 const queryType = new GraphQLObjectType({
     name: 'Query',

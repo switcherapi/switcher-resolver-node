@@ -1,6 +1,6 @@
 import { Switcher, checkValue, checkRegex } from 'switcher-client';
-import { getDomainById } from '../services/domain';
-import { DEFAULT_RATE_LIMIT } from '../middleware/limiter';
+import { getDomainById } from '../services/domain.js';
+import { DEFAULT_RATE_LIMIT } from '../middleware/limiter.js';
 
 const apiKey = process.env.SWITCHER_API_KEY;
 const environment = process.env.SWITCHER_API_ENVIRONMENT;

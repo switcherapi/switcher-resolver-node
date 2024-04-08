@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 import moment from 'moment';
-import { parseJSON, payloadReader } from '../helpers';
-import IPCIDR from '../helpers/ipcidr';
-import TimedMatch from '../helpers/timed-match/';
+import { parseJSON, payloadReader } from '../helpers/index.js';
+import IPCIDR from '../helpers/ipcidr.js';
+import TimedMatch from '../helpers/timed-match/index.js';
 
 export const StrategiesType = Object.freeze({
     NETWORK: 'NETWORK_VALIDATION',

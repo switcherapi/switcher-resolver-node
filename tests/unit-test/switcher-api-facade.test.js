@@ -12,7 +12,7 @@ import {
 import { Switcher, checkValue } from 'switcher-client';
 import ExecutionLogger from 'switcher-client/src/lib/utils/executionLogger';
 
-require('../../src/db/mongoose');
+import '../../src/db/mongoose';
 
 afterAll(async () => {
     await new Promise(resolve => setTimeout(resolve, 1000));

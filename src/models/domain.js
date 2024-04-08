@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { EnvType } from './environment';
+import { EnvType } from './environment.js';
 
 const domainSchema = new mongoose.Schema({
     name: {

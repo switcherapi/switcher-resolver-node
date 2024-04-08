@@ -1,5 +1,5 @@
 import { validationResult } from 'express-validator';
-import { getConfig } from '../services/config';
+import { getConfig } from '../services/config.js';
 
 export async function checkConfig(req, res, next) {
     const config = await getConfig({ domain: req.domain, key: String(req.query.key) }, true);
