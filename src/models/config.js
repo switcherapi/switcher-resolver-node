@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { EnvType } from './environment';
+import { EnvType } from './environment.js';
 
 export const RelayMethods = Object.freeze({
     POST: 'POST',

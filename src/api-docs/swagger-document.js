@@ -1,7 +1,6 @@
-import pathClient from './paths/path-client';
+import pathClient from './paths/path-client.js';
 
-import { commonSchema } from './schemas/common';
-import info from './swagger-info';
+import info from './swagger-info.js';
 
 export default {
     openapi: '3.0.1',
@@ -27,9 +26,6 @@ export default {
                 in: 'header',
                 name: 'switcher-api-key'
             }
-        },
-        schemas: {
-            ...commonSchema
         }
     },
     paths: {

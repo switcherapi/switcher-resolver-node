@@ -1,4 +1,4 @@
-import Component from '../models/component';
+import Component from '../models/component.js';
 
 export async function getComponentById(id) {
     return Component.findById(id).exec();

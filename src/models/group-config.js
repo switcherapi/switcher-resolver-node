@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { EnvType } from '../models/environment';
+import { EnvType } from '../models/environment.js';
 
 const groupConfigSchema = new mongoose.Schema({
     name: {

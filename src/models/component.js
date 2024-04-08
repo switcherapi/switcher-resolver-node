@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import bcryptjs from 'bcryptjs';
 import { randomUUID } from 'crypto';
 import jwt from 'jsonwebtoken';
-import Domain from './domain';
+import Domain from './domain.js';
 
 export const EncryptionSalts = Object.freeze({
     COMPONENT: 8

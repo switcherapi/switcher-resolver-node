@@ -1,9 +1,9 @@
-import { resolveConfigStrategy, resolveConfig, resolveGroupConfig, resolveEnvStatus } from './resolvers';
 import { GraphQLObjectType, GraphQLString, GraphQLList, GraphQLBoolean, GraphQLFloat } from 'graphql';
-import { EnvType } from '../models/environment';
+import { resolveConfigStrategy, resolveConfig, resolveGroupConfig, resolveEnvStatus } from './resolvers.js';
+import { EnvType } from '../models/environment.js';
 import { 
     resolveComponents, 
-} from './configuration-resolvers';
+} from './configuration-resolvers.js';
 
 const envStatus = new GraphQLObjectType({
     name: 'EnvStatus',

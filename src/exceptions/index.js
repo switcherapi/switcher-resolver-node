@@ -1,4 +1,4 @@
-import Logger from '../helpers/logger';
+import Logger from '../helpers/logger.js';
 
 export class BadRequestError extends Error {
     constructor(message) {
