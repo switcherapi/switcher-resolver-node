@@ -4,13 +4,11 @@ import {
     getRateLimit
 } from '../../src/external/switcher-api-facade';
 import { 
-    setupDatabase, 
-    domainDocument,
+    setupDatabase,
     component1,
     component1Key
 } from '../fixtures/db_api';
-import { Switcher, checkValue } from 'switcher-client';
-import ExecutionLogger from 'switcher-client/src/lib/utils/executionLogger';
+import { Switcher } from 'switcher-client';
 
 import '../../src/db/mongoose';
 
@@ -29,13 +27,7 @@ describe('Testing Switcher API Facade', () => {
 
     test('UNIT_API_FACADE - Should read rate limit - 100 Request Per Minute', async () => {
         const call = async () => {
-            Switcher.assume(SwitcherKeys.RATE_LIMIT).true();
-            ExecutionLogger.add(
-                { message: JSON.stringify({ rate_limit: 100 }) }, 
-                SwitcherKeys.RATE_LIMIT,
-                [checkValue(domainDocument.owner.toString())]
-            );
-
+            Switcher.assume(SwitcherKeys.RATE_LIMIT).true().withMetadata({ rate_limit: 100 });
             return getRateLimit(component1Key, component1);
         }; 
 

@@ -7,6 +7,7 @@ const environment = process.env.SWITCHER_API_ENVIRONMENT;
 const domainName = process.env.SWITCHER_API_DOMAIN;
 const url = process.env.SWITCHER_API_URL;
 const logger = process.env.SWITCHER_API_LOGGER == 'true';
+const throttle = process.env.SWITCHER_API_THROTTLE;
 const certPath = process.env.SSL_CERT;
 const component = 'switcherapi';
 
@@ -19,21 +20,23 @@ export const SwitcherKeys = Object.freeze({
 
 async function checkFeature(feature, params) {
     const switcher = Switcher.factory();
-    return switcher.isItOn(feature, params, true);
+
+    if (throttle) {
+        switcher.throttle(throttle);
+    }
+
+    return switcher.detail().isItOn(feature, params);
 }
 
 export async function getRateLimit(key, component) {
     if (process.env.SWITCHER_API_ENABLE === 'true' && key !== process.env.SWITCHER_API_KEY) {
         const domain = await getDomainById(component.domain);
-        const result = await checkFeature(SwitcherKeys.RATE_LIMIT, [
+        const response = await checkFeature(SwitcherKeys.RATE_LIMIT, [
             checkValue(String(domain.owner))
         ]);
 
-        if (result) {
-            const log = Switcher.getLogger(SwitcherKeys.RATE_LIMIT)
-                .find(log => log.input[0][1] === String(domain.owner));
-            
-            return JSON.parse(log.response.message).rate_limit;
+        if (response.result) {
+            return response.metadata.rate_limit;
         }
     }
 
