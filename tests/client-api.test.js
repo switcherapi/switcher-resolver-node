@@ -115,6 +115,17 @@ describe('Testing criteria [GraphQL] ', () => {
             }).expect(401);
     });
 
+    test('CLIENT_SUITE - Should NOT authenticate invalid environment', async () => {
+        await request(app)
+            .post('/criteria/auth')
+            .set('switcher-api-key', `${apiKey}`)
+            .send({
+                domain: domainDocument.name,
+                component: component1.name,
+                environment: 'UNKNOWN ENVIRONMENT'
+            }).expect(401);
+    });
+
     test('CLIENT_SUITE - Should NOT return success on a simple CRITERIA response - Bad login input', async () => {
         const req = await request(app)
             .post('/graphql')
@@ -708,9 +719,9 @@ describe('Testing criteria [REST] ', () => {
             .get('/criteria/snapshot_check/ONLY_NUMBER_ALLOWED')
             .set('Authorization', `Bearer ${token}`)
             .send();
-
-        expect(req.statusCode).toBe(400);
-        expect(req.body.error).toEqual('Wrong value for domain version');
+        
+        expect(req.statusCode).toBe(422);
+        expect(req.body.errors[0].msg).toEqual('Wrong value for domain version');
     });
 
     test('CLIENT_SUITE - Should return error when validating snapshot version - Invalid token', async () => {
