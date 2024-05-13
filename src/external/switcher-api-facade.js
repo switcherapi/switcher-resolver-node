@@ -1,4 +1,4 @@
-import { Switcher, checkValue, checkRegex } from 'switcher-client';
+import { Client } from 'switcher-client';
 import { getDomainById } from '../services/domain.js';
 import { DEFAULT_RATE_LIMIT } from '../middleware/limiter.js';
 
@@ -11,32 +11,32 @@ const throttle = process.env.SWITCHER_API_THROTTLE;
 const certPath = process.env.SSL_CERT;
 const component = 'switcherapi';
 
-Switcher.buildContext({ url, apiKey, domain: domainName, component, environment }, { logger, certPath });
+Client.buildContext({ url, apiKey, domain: domainName, component, environment }, { logger, certPath });
 
 export const SwitcherKeys = Object.freeze({
     RATE_LIMIT: 'RATE_LIMIT',
     HTTPS_AGENT: 'HTTPS_AGENT'
 });
 
-async function checkFeature(feature, params) {
-    const switcher = Switcher.factory();
+function getFeatureFlag(feature) {
+    const switcher = Client.getSwitcher(feature);
 
     if (throttle) {
         switcher.throttle(throttle);
     }
 
-    return switcher.detail().isItOn(feature, params);
+    return switcher.detail();
 }
 
 export async function getRateLimit(key, component) {
     if (process.env.SWITCHER_API_ENABLE === 'true' && key !== process.env.SWITCHER_API_KEY) {
         const domain = await getDomainById(component.domain);
-        const response = await checkFeature(SwitcherKeys.RATE_LIMIT, [
-            checkValue(String(domain.owner))
-        ]);
+        const featureFlag = await getFeatureFlag(SwitcherKeys.RATE_LIMIT)
+            .checkValue(String(domain.owner))
+            .isItOn();
 
-        if (response.result) {
-            return response.metadata.rate_limit;
+        if (featureFlag.result) {
+            return featureFlag.metadata.rate_limit;
         }
     }
 
@@ -47,5 +47,7 @@ export async function checkHttpsAgent(value) {
     if (process.env.SWITCHER_API_ENABLE != 'true')
         return;
 
-    return checkFeature(SwitcherKeys.HTTPS_AGENT, [checkRegex(value)]);
+    return getFeatureFlag(SwitcherKeys.HTTPS_AGENT)
+        .checkRegex(value)
+        .isItOn();
 }

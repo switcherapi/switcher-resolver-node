@@ -8,7 +8,7 @@ import {
     component1,
     component1Key
 } from '../fixtures/db_api';
-import { Switcher } from 'switcher-client';
+import { Client } from 'switcher-client';
 
 import '../../src/db/mongoose';
 
@@ -27,7 +27,7 @@ describe('Testing Switcher API Facade', () => {
 
     test('UNIT_API_FACADE - Should read rate limit - 100 Request Per Minute', async () => {
         const call = async () => {
-            Switcher.assume(SwitcherKeys.RATE_LIMIT).true().withMetadata({ rate_limit: 100 });
+            Client.assume(SwitcherKeys.RATE_LIMIT).true().withMetadata({ rate_limit: 100 });
             return getRateLimit(component1Key, component1);
         }; 
 
@@ -36,7 +36,7 @@ describe('Testing Switcher API Facade', () => {
 
     test('UNIT_API_FACADE - Should NOT read rate limit - Default Request Per Minute', async () => {
         const call = async () => {
-            Switcher.assume(SwitcherKeys.RATE_LIMIT).false();
+            Client.assume(SwitcherKeys.RATE_LIMIT).false();
             return getRateLimit(component1Key, component1);
         }; 
 
