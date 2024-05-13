@@ -9,6 +9,7 @@ import './db/mongoose.js';
 import mongoose from 'mongoose';
 import swaggerDocument from './api-docs/swagger-document.js';
 import clientApiRouter from './routers/client-api.js';
+import serverApiRouter from './routers/server-api.js';
 import schema from './client/schema.js';
 import { appAuth, resourcesAuth } from './middleware/auth.js';
 import { clientLimiter, defaultLimiter } from './middleware/limiter.js';
@@ -28,6 +29,7 @@ app.disable('x-powered-by');
  * API Routes
  */
 app.use(clientApiRouter);
+app.use(serverApiRouter);
 
 /**
  * GraphQL Routes
