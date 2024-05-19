@@ -171,8 +171,9 @@ function checkFlags(config, group, domain, environment) {
 async function checkStrategy(entry, strategies, environment) {
     if (strategies) {
         for (const strategy of strategies) {
-            if (!strategy.activated[environment]) 
+            if (!strategy.activated[environment]) {
                 continue;
+            }
             
             await checkStrategyInput(entry, strategy);
         }

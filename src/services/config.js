@@ -23,22 +23,26 @@ export async function getConfigs(where) {
 export function isRelayValid(relay) {
     const bypass = process.env.RELAY_BYPASS_HTTPS === 'true' || false;
 
-    if (bypass || !relay.endpoint)
+    if (bypass || !relay.endpoint) {
         return;
+    }
 
     const foundNotHttps = Object.values(relay.endpoint)
         .filter(endpoint => !endpoint.toLowerCase().startsWith('https'));
     
-    if (foundNotHttps.length)
+    if (foundNotHttps.length) {
         throw new BadRequestError('HTTPS required');
+    }
 }
 
 export function isRelayVerified(relay, environment) {
     const bypass = process.env.RELAY_BYPASS_VERIFICATION === 'true' || false;
 
-    if (bypass)
+    if (bypass) {
         return;
+    }
     
-    if (!relay.verified[environment])
+    if (!relay.verified[environment]) {
         throw new BadRequestError('Relay not verified');
+    }
 }
