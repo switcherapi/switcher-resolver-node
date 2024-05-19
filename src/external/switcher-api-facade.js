@@ -44,8 +44,9 @@ export async function getRateLimit(key, component) {
 }
 
 export async function checkHttpsAgent(value) {
-    if (process.env.SWITCHER_API_ENABLE != 'true')
+    if (process.env.SWITCHER_API_ENABLE != 'true') {
         return;
+    }
 
     return getFeatureFlag(SwitcherKeys.HTTPS_AGENT)
         .checkRegex(value)
