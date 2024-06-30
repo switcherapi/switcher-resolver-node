@@ -33,6 +33,10 @@ export async function appAuth(req, res, next) {
         req.rate_limit = decoded.rate_limit;
         next();
     } catch (err) {
+        if (err.name === 'TokenExpiredError') {
+            return res.status(401).send({ error: 'Token expired.' });
+        }
+        
         responseExceptionSilent(res, err, 401, 'Invalid API token.');
     }
 }
