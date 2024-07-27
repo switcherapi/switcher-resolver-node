@@ -27,7 +27,7 @@ Resolver Node for Component Switchers<br>
 * * *
 
 ### Local setup
-1. npm install
+1. npm ci
 2. Add .env-cmdrc file into the project directory (use '.env-cmdrc-template')
 3. Replace values such as secret keys and URLs
 
