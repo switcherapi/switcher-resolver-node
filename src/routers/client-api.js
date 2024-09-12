@@ -24,7 +24,7 @@ router.post('/criteria', appAuth, clientLimiter, [
     try {
         const environment = req.environment;
         const domain = req.domain;
-        const entry = req.body.entry;
+        const entry = req.body?.entry;
 
         const context = { domain, entry, environment, bypassMetric: req.query.bypassMetric, component: req.component };
 
