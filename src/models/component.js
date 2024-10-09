@@ -74,17 +74,8 @@ componentSchema.statics.findByCredentials = async (domainName, componentName, ap
         throw new Error('Unable to find this Component');
     }
 
-    let isMatch = false;
-
-    // Validate API Key type
-    if (apiKey.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)) {
-        isMatch = await bcryptjs.compare(apiKey, component.apihash);
-    } else {
-        // Must be deprecated by date
-        let decoded = Buffer.from(apiKey, 'base64').toString('ascii');
-        isMatch = await bcryptjs.compare(decoded, component.apihash);
-    }
-
+    const isMatch = await bcryptjs.compare(apiKey, component.apihash);
+    
     if (!isMatch) {
         throw new Error('Unable to find this Component');
     }
