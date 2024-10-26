@@ -75,7 +75,7 @@ export async function resolveGroupConfig(source, _id, name, activated, context) 
 }
 
 export async function resolveDomain(activated, context) {
-    let domain = await Domain.findOne({ _id: context.domain }).lean().exec();
+    const domain = await Domain.findById(context.domain).lean().exec();
     if (activated !== undefined) {
         if (domain.activated[context.environment] !== activated) {
             return null;
@@ -85,8 +85,8 @@ export async function resolveDomain(activated, context) {
     return domain;
 }
 
-export async function checkDomain(domainId) {
-    return Domain.findOne({ _id: domainId }, null, { lean: true });
+export async function findDomain(domainId) {
+    return Domain.findById(domainId).lean();
 }
 
 /**
@@ -101,7 +101,9 @@ async function resolveComponentsFirst(source, context, groups) {
         context._component = component?._id;
         for (const group of groups) {
             let configsLength = await Config.find({
-                 domain: source._id, group: group._id, components: context._component 
+                 domain: source._id, 
+                 group: group._id, 
+                 components: context._component 
             }).countDocuments().exec();
 
             if (configsLength) {
@@ -113,12 +115,11 @@ async function resolveComponentsFirst(source, context, groups) {
     return groups;
 }
 
-async function checkGroup(configId) {
-    const config = await Config.findOne({ _id: configId }, null, { lean: true }).exec();
-    return GroupConfig.findOne({ _id: config.group }, null, { lean: true });
+async function findGroup(config) {
+    return GroupConfig.findById(config.group).lean();
 }
 
-async function checkConfigStrategies(configId, strategyFilter) {
+async function findConfigStrategies(configId, strategyFilter) {
     return ConfigStrategy.find({ config: configId }, strategyFilter).lean();
 }
 
@@ -198,16 +199,16 @@ export async function resolveCriteria(config, context, strategyFilter) {
     let domain, group, strategies;
 
     await Promise.all([
-        checkDomain(context.domain), 
-        checkGroup(config._id), 
-        checkConfigStrategies(config._id, strategyFilter)
+        findDomain(context.domain), 
+        findGroup(config), 
+        findConfigStrategies(config._id, strategyFilter)
     ]).then(result => {
         domain = result[0];
         group = result[1];
         strategies = result[2];
     });
     
-    let response = {
+    const response = {
         domain,
         group,
         strategies,
