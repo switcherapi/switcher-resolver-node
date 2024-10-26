@@ -3,7 +3,7 @@ import { body, check, query, header } from 'express-validator';
 import jwt from 'jsonwebtoken';
 import { checkConfig, checkConfigComponent, validate } from '../middleware/validators.js';
 import { appAuth, appGenerateCredentials } from '../middleware/auth.js';
-import { resolveCriteria, checkDomain } from '../client/resolvers.js';
+import { resolveCriteria, findDomain } from '../client/resolvers.js';
 import { getConfigs } from '../services/config.js';
 import { clientLimiter } from '../middleware/limiter.js';
 import { StrategiesType } from '../models/config-strategy.js';
@@ -51,7 +51,7 @@ router.get('/criteria/snapshot_check/:version', appAuth, clientLimiter, [
     check('version', 'Wrong value for domain version').isNumeric()
 ], validate, async (req, res) => {
     try {
-        const domain = await checkDomain(req.domain);
+        const domain = await findDomain(req.domain);
         const version = req.params.version;
 
         if (domain.lastUpdate > version) {
