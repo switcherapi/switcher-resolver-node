@@ -4,8 +4,9 @@ import { BadRequestError } from '../exceptions/index.js';
 export async function getConfig(where, lean = false) {
     const query = Config.findOne();
 
-    if (where.domain) query.where('domain', where.domain);
-    if (where.key) query.where('key', where.key);
+    query.where('domain', where.domain);
+    query.where('key', where.key);
+
     if (lean) query.lean();
     
     return query.exec();
@@ -14,8 +15,8 @@ export async function getConfig(where, lean = false) {
 export async function getConfigs(where) {
     const query = Config.find();
     
-    if (where.domain) query.where('domain', where.domain);
-    if (where.components) query.where('components', where.components);
+    query.where('domain', where.domain);
+    query.where('components', where.components);
 
     return query.exec();
 }

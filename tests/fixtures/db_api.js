@@ -111,11 +111,19 @@ export const config1Document = {
     _id: configId1,
     key: 'TEST_CONFIG_KEY_1',
     description: 'Test config 1',
-    activated: new Map().set(EnvType.DEFAULT, true),
+    activated: new Map().set(EnvType.DEFAULT, true).set('dev', false).set('staging', false),
     owner: adminMasterAccountId,
     group: groupConfigId,
     domain: domainId,
-    components: [component1Id]
+    components: [component1Id],
+    relay: {
+        type: 'NOTIFICATION',
+        method: 'POST',
+        endpoint: new Map().set(EnvType.DEFAULT, 'http://localhost:3000'),
+        activated: new Map().set(EnvType.DEFAULT, true),
+        auth_token: new Map().set(EnvType.DEFAULT, 'token'),
+        auth_prefix: 'Bearer'
+    }
 };
 
 export const configId2 = new mongoose.Types.ObjectId();

@@ -11,18 +11,17 @@ import { isRelayVerified, isRelayValid } from '../services/config.js';
 
 export const resolveConfigByKey = async (domain, key) => Config.findOne({ domain, key }, null, { lean: true });
 
-export function resolveEnvStatus(source) {
-    const key = Object.keys(source.activated);
-    const arrStatus = [];
+export function resolveEnvValue(source, field, keys) {
+    const arrValue = [];
 
-    key.forEach(k => {
-        arrStatus.push({
+    keys.forEach(k => {
+        arrValue.push({
             env: k,
-            value: source.activated[k]
+            value: source[field][k]
         });
     });
 
-    return arrStatus;
+    return arrValue;
 }
 
 export async function resolveConfigStrategy(source, _id, strategy, operation, activated, context) {
@@ -41,6 +40,17 @@ export async function resolveConfigStrategy(source, _id, strategy, operation, ac
     }
 
     return strategies;
+}
+
+export async function resolveRelay(source, context) {
+    const relay = source.relay;
+    const environment = context.environment ? context.environment : EnvType.DEFAULT;
+
+    if (!relay.type || !relay.activated[environment] || !relay.endpoint[environment]) {
+        return null;
+    }
+
+    return relay;
 }
 
 export async function resolveConfig(source, _id, key, activated, context) {
@@ -119,11 +129,11 @@ async function findGroup(config) {
     return GroupConfig.findById(config.group).lean();
 }
 
-async function findConfigStrategies(configId, strategyFilter) {
-    return ConfigStrategy.find({ config: configId }, strategyFilter).lean();
+async function findConfigStrategies(configId, domainId, strategyFilter) {
+    return ConfigStrategy.find({ config: configId, domain: domainId }, strategyFilter).lean();
 }
 
-async function resolveRelay(config, environment, entry, response) {
+async function checkRelay(config, environment, entry, response) {
     try {
         if (config.relay?.activated[environment]) {
             isRelayValid(config.relay);
@@ -201,7 +211,7 @@ export async function resolveCriteria(config, context, strategyFilter) {
     await Promise.all([
         findDomain(context.domain), 
         findGroup(config), 
-        findConfigStrategies(config._id, strategyFilter)
+        findConfigStrategies(config._id, context.domain, strategyFilter)
     ]).then(result => {
         domain = result[0];
         group = result[1];
@@ -219,7 +229,7 @@ export async function resolveCriteria(config, context, strategyFilter) {
     try {
         checkFlags(config, group, domain, environment);
         await checkStrategy(context.entry, strategies, environment);
-        await resolveRelay(config, environment, context.entry, response);
+        await checkRelay(config, environment, context.entry, response);
     } catch (e) {
         response.result = false;
         response.reason = e.message;
