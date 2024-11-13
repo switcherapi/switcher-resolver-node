@@ -16,8 +16,10 @@ describe('Test cache', () => {
         await cache.initializeCache();
 
         const cacheData = cache.getAll();
+        const cacheSingle = cache.get(cacheData.keys().next().value);
+        
         expect(cacheData.size).toBeGreaterThan(0);
-        expect(cacheData.get(cacheData.keys().next().value)).toBeDefined();
+        expect(cacheSingle).toBeDefined();
     });
 
 });
