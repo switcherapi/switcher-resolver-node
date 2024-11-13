@@ -1,5 +1,5 @@
 import { GraphQLObjectType, GraphQLString, GraphQLList, GraphQLBoolean, GraphQLFloat } from 'graphql';
-import { resolveConfigStrategy, resolveConfig, resolveGroupConfig, resolveEnvStatus } from './resolvers.js';
+import { resolveConfigStrategy, resolveConfig, resolveGroupConfig, resolveRelay, resolveEnvValue } from './resolvers.js';
 import { EnvType } from '../models/environment.js';
 import { 
     resolveComponents, 
@@ -13,6 +13,18 @@ const envStatus = new GraphQLObjectType({
         },
         value: { 
             type: GraphQLBoolean
+        }
+    }
+});
+
+const envValue = new GraphQLObjectType({
+    name: 'EnvValue',
+    fields: {
+        env: { 
+            type: GraphQLString
+        },
+        value: { 
+            type: GraphQLString
         }
     }
 });
@@ -36,7 +48,7 @@ export const strategyType = new GraphQLObjectType({
         statusByEnv: {
             type: new GraphQLList(envStatus),
             resolve: (source) => {
-                return resolveEnvStatus(source);
+                return resolveEnvValue(source, 'activated', Object.keys(source.activated));
             }
         },
         operation: {
@@ -44,6 +56,39 @@ export const strategyType = new GraphQLObjectType({
         },
         values: {
             type: new GraphQLList(GraphQLString)
+        }
+    }
+});
+
+export const relayType = new GraphQLObjectType({
+    name: 'Relay',
+    fields: {
+        type: {
+            type: GraphQLString,
+        },
+        method: {
+            type: GraphQLString,
+        },
+        endpointByEnv: {
+            type: new GraphQLList(envValue),
+            resolve: (source) => {
+                return resolveEnvValue(source, 'endpoint', Object.keys(source.endpoint));
+            }
+        },
+        statusByEnv: {
+            type: new GraphQLList(envStatus),
+            resolve: (source) => {
+                return resolveEnvValue(source, 'activated', Object.keys(source.activated));
+            }
+        },
+        auth_token: {
+            type: new GraphQLList(envValue),
+            resolve: (source) => {
+                return resolveEnvValue(source, 'auth_token', Object.keys(source.auth_token));
+            }
+        },
+        auth_prefix: {
+            type: GraphQLString
         }
     }
 });
@@ -70,7 +115,7 @@ export const configType = new GraphQLObjectType({
         statusByEnv: {
             type: new GraphQLList(envStatus),
             resolve: (source) => {
-                return resolveEnvStatus(source);
+                return resolveEnvValue(source, 'activated', Object.keys(source.activated));
             }
         },
         strategies: {
@@ -98,6 +143,12 @@ export const configType = new GraphQLObjectType({
             resolve: async (source) => {
                 return resolveComponents(source);
             }
+        },
+        relay: {
+            type: relayType,
+            resolve: (source, _args, context) => {
+                return resolveRelay(source, context);
+            }
         }
     }
 });
@@ -124,7 +175,7 @@ export const groupConfigType = new GraphQLObjectType({
         statusByEnv: {
             type: new GraphQLList(envStatus),
             resolve: (source) => {
-                return resolveEnvStatus(source);
+                return resolveEnvValue(source, 'activated', Object.keys(source.activated));
             }
         },
         config: {
@@ -189,7 +240,7 @@ export const domainType = new GraphQLObjectType({
         statusByEnv: {
             type: new GraphQLList(envStatus),
             resolve: (source) => {
-                return resolveEnvStatus(source);
+                return resolveEnvValue(source, 'activated', Object.keys(source.activated));
             }
         },
         group: {
