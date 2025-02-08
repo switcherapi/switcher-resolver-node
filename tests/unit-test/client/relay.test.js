@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { resolveValidation } from '../../../src/client/relay';
 import sinon from 'sinon';
 import axios from 'axios';
@@ -5,6 +6,13 @@ import { RelayMethods } from '../../../src/models/config';
 import { StrategiesType } from '../../../src/models/config-strategy';
 import { EnvType } from '../../../src/models/environment';
 import { Client } from 'switcher-client';
+
+import '../../../src/app';
+
+afterAll(async () => { 
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    await mongoose.disconnect();
+});
 
 describe('Testing Client Relay', () => {
 

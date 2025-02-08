@@ -1,9 +1,17 @@
+import mongoose from 'mongoose';
 import { payloadReader } from '../../src/helpers';
 import { 
     processOperation,
     StrategiesType,
     OperationsType
 } from '../../src/models/config-strategy';
+
+import '../../src/app';
+
+afterAll(async () => { 
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    await mongoose.disconnect();
+});
 
 describe('Processing strategy: NETWORK', () => {
 
