@@ -30,8 +30,8 @@ export const domainQuery = (id) => `
                     relay {
                         type
                         method
-                        auth_prefix
-                        auth_token {
+                        authPrefix
+                        authTokenByEnv {
                             env
                             value
                         }
@@ -40,6 +40,10 @@ export const domainQuery = (id) => `
                             value
                         }
                         statusByEnv {
+                            env
+                            value
+                        }
+                        verifiedByEnv {
                             env
                             value
                         }
@@ -105,6 +109,9 @@ function reduceRelay(config) {
         return;
     }
 
+    config.relay.auth_prefix = config.relay.authPrefix;
+    delete config.relay.authPrefix;
+
     config.relay.activated = config.relay.statusByEnv.reduce((acc, { env, value }) => {
         acc[env] = value;
         return acc;
@@ -117,8 +124,15 @@ function reduceRelay(config) {
     }, {});
     delete config.relay.endpointByEnv;
 
-    config.relay.auth_token = config.relay.auth_token.reduce((acc, { env, value }) => {
+    config.relay.auth_token = config.relay.authTokenByEnv.reduce((acc, { env, value }) => {
         acc[env] = value;
         return acc;
     }, {});
+    delete config.relay.authTokenByEnv;
+
+    config.relay.verified = config.relay.verifiedByEnv.reduce((acc, { env, value }) => {
+        acc[env] = value;
+        return acc;
+    }, {});
+    delete config.relay.verifiedByEnv;
 }

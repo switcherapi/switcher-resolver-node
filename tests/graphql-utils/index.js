@@ -19,6 +19,22 @@ export const domainQuery = (where, group, config, strategy) => {
                             strategies${elementQuery(strategy)} { 
                                 strategy activated operation values statusByEnv { env value }
                             }
+                            relay {
+                                type
+                                method
+                                endpointByEnv {
+                                    env
+                                    value
+                                }
+                                statusByEnv {
+                                    env
+                                    value
+                                }
+                                statusByEnv {
+                                    env
+                                    value
+                                }
+                            }
                             components
                         }
                     }
@@ -39,8 +55,64 @@ export const criteriaQuery = (key, entries) => {
     `};
 };
 
+export const criteriaDetailedQuery = (key, entries) => {
+    return {
+        query: `
+            {
+                criteria(
+                    key: "${key}", 
+                    entry: [${entries}]
+                ) { 
+                    response {
+                        result
+                        reason
+                        domain {
+                            name
+                            activated
+                            description
+                        }
+                        group {
+                            name
+                            activated
+                            description
+                        }
+                        strategies {
+                            strategy
+                            activated
+                            operation
+                            values
+                        }
+                    }
+                }
+            }  
+    `};
+};
+
 export const criteriaResult = (result, reason) => `
     {  "data": { "criteria": { "response": { "result": ${result}, "reason": "${reason}" } } } }`;
+
+export const criteriaDetailedResult = (result, reason, environment, domain, group, strategies) => `
+    {  "data": { "criteria": { "response": {
+        "result": ${result},
+        "reason": "${reason}",
+        "domain": {
+            "name": "${domain.name}",
+            "activated": ${domain.activated.get(environment)},
+            "description": "${domain.description}"
+        },
+        "group": {
+            "name": "${group.name}",
+            "activated": ${group.activated.get(environment)},
+            "description": "${group.description}"
+        },
+        "strategies": [${strategies.map(s => `
+            {
+                "strategy": "${s.strategy}",
+                "activated": ${s.activated.get(environment)},
+                "operation": "${s.operation}",
+                "values": [${s.values.map(v => `"${v}"`).join(', ')}]
+            }`)}]
+    } } } }`;
 
 export const  buildEntries = (entries) => {
     return `${entries.map(createStrategyInput)}`;
@@ -99,7 +171,19 @@ export const expected102 = `
                         "values":[
                             "10.0.0.0/24"
                         ]
-                    }]
+                    }],
+                    "relay": {
+                        "type": "NOTIFICATION",
+                        "method": "POST",
+                        "endpointByEnv": [{
+                            "env": "default",
+                            "value": "http://localhost:3000"
+                        }],
+                        "statusByEnv": [{
+                            "env": "default",
+                            "value": false
+                        }]
+                    }
                 }]
             }]
         }

@@ -95,7 +95,16 @@ export const configDocument = {
     owner: adminMasterAccountId,
     components: [],
     group: groupConfigId,
-    domain: domainId
+    domain: domainId,
+    relay: {
+        type: 'NOTIFICATION',
+        method: 'POST',
+        verified: new Map().set(EnvType.DEFAULT, true),
+        endpoint: new Map().set(EnvType.DEFAULT, 'http://localhost:3000'),
+        activated: new Map().set(EnvType.DEFAULT, false),
+        auth_token: new Map().set(EnvType.DEFAULT, 'token'),
+        auth_prefix: 'Bearer'
+    }
 };
 
 export const configStrategyUSERId = new mongoose.Types.ObjectId();

@@ -20,7 +20,8 @@
 									"    pm.environment.set('authClientToken', pm.response.json().token)",
 									"}"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
@@ -44,14 +45,13 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"domain\": \"Playground\",\n\t\"component\": \"switcher-playground\",\n\t\"environment\": \"default\"\n}",
+							"raw": "{\n\t\"domain\": \"{{domain}}\",\n\t\"component\": \"{{component}}\",\n\t\"environment\": \"{{environment}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -89,7 +89,7 @@
 					"response": []
 				},
 				{
-					"name": "Resolve criteria - with input",
+					"name": "Resolve criteria - with JSON as input",
 					"request": {
 						"auth": {
 							"type": "bearer",
@@ -105,7 +105,6 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
 								"value": "application/json",
 								"type": "text"
 							}
@@ -120,7 +119,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{url}}/criteria?showReason=true&showStrategy=true&key=MY_SWITCHER",
+							"raw": "{{url}}/criteria?showReason={{show_reason_boolean}}&showStrategy={{show_strategy_boolean}}&key={{switcher_key}}",
 							"host": [
 								"{{url}}"
 							],
@@ -130,11 +129,11 @@
 							"query": [
 								{
 									"key": "showReason",
-									"value": "true"
+									"value": "{{show_reason_boolean}}"
 								},
 								{
 									"key": "showStrategy",
-									"value": "true"
+									"value": "{{show_strategy_boolean}}"
 								},
 								{
 									"key": "bypassMetric",
@@ -143,7 +142,7 @@
 								},
 								{
 									"key": "key",
-									"value": "MY_SWITCHER"
+									"value": "{{switcher_key}}"
 								}
 							]
 						}
@@ -167,9 +166,8 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -182,7 +180,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{url}}/criteria?key=MY_SWITCHER",
+							"raw": "{{url}}/criteria?key={{switcher_key}}",
 							"host": [
 								"{{url}}"
 							],
@@ -207,7 +205,7 @@
 								},
 								{
 									"key": "key",
-									"value": "MY_SWITCHER"
+									"value": "{{switcher_key}}"
 								}
 							]
 						}
@@ -234,9 +232,8 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -261,7 +258,7 @@
 							"variable": [
 								{
 									"key": "version",
-									"value": "1588557288037"
+									"value": "{{version}}"
 								}
 							]
 						}
@@ -285,14 +282,13 @@
 						"header": [
 							{
 								"key": "Content-Type",
-								"name": "Content-Type",
-								"type": "text",
-								"value": "application/json"
+								"value": "application/json",
+								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"switchers\": [\r\n        \"FEATURE2020\",\r\n        \"RELAY_1\"\r\n    ]\r\n}",
+							"raw": "{\r\n    \"switchers\": [\r\n        \"{{switcher_key}}\"\r\n    ]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -318,7 +314,7 @@
 			"name": "GraphqQL",
 			"item": [
 				{
-					"name": "Resolve criteria - complex",
+					"name": "Resolve criteria - detailed",
 					"event": [
 						{
 							"listen": "test",
@@ -326,7 +322,8 @@
 								"exec": [
 									""
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {}
 							}
 						}
 					],
@@ -346,7 +343,7 @@
 						"body": {
 							"mode": "graphql",
 							"graphql": {
-								"query": "{\r\n  criteria(\r\n      key: \"MY_SWITCHER\",\r\n    #   bypassMetric: false,\r\n      entry: [\r\n              {\r\n                  strategy: \"VALUE_VALIDATION\", \r\n                  input: \"Roger\"\r\n              }\r\n            ]\r\n        ) {\r\n    key\r\n    activated\r\n    response {\r\n        result\r\n        reason\r\n        domain {\r\n            name\r\n            activated\r\n            description\r\n            group {\r\n                name\r\n                activated\r\n                description\r\n                config {\r\n                    key\r\n                    activated\r\n                    description\r\n                    strategies {\r\n                        strategy\r\n                        activated\r\n                        operation\r\n                        values\r\n                    }\r\n                }\r\n            }\r\n        }\r\n        group {\r\n            name\r\n            activated\r\n            description\r\n        }\r\n        strategies {\r\n            strategy\r\n            activated\r\n            operation\r\n            values\r\n        }\r\n    }\r\n  }\r\n}",
+								"query": "{\r\n  criteria(\r\n      key: \"{{switcher_key}}\",\r\n      entry: [\r\n              {\r\n                  strategy: \"{{strategy_type}}\", \r\n                  input: \"{{strategy_input}}\"\r\n              }\r\n            ]\r\n        ) {\r\n    key\r\n    activated\r\n    response {\r\n        result\r\n        reason\r\n        domain {\r\n            name\r\n            activated\r\n            description\r\n        }\r\n        group {\r\n            name\r\n            activated\r\n            description\r\n        }\r\n        strategies {\r\n            strategy\r\n            activated\r\n            operation\r\n            values\r\n        }\r\n    }\r\n  }\r\n}",
 								"variables": ""
 							}
 						},
@@ -380,7 +377,7 @@
 						"body": {
 							"mode": "graphql",
 							"graphql": {
-								"query": "{\r\n  criteria(\r\n      key: \"MY_SWITCHER\", \r\n      entry: [\r\n              {\r\n                  strategy: \"VALUE_VALIDATION\", \r\n                  input: \"Roger\"\r\n              },\r\n              {\r\n                  strategy: \"NETWORK_VALIDATION\", \r\n                  input: \"192.168.0.2\"\r\n              }\r\n            ]\r\n        ) {\r\n    response {\r\n        result\r\n        reason\r\n    }\r\n  }\r\n}",
+								"query": "{\r\n  criteria(\r\n      key: \"{{switcher_key}}\", \r\n      entry: [\r\n              {\r\n                  strategy: \"VALUE_VALIDATION\", \r\n                  input: \"{{value_input}}\"\r\n              },\r\n              {\r\n                  strategy: \"NETWORK_VALIDATION\", \r\n                  input: \"{{network_input}}\"\r\n              }\r\n            ]\r\n        ) {\r\n    response {\r\n        result\r\n        reason\r\n    }\r\n  }\r\n}",
 								"variables": ""
 							}
 						},
@@ -414,8 +411,8 @@
 						"body": {
 							"mode": "graphql",
 							"graphql": {
-								"query": "{\r\n    domain(activated: true) {\r\n        name\r\n        version\r\n        description\r\n        activated\r\n        group(activated: true) {\r\n            name\r\n            description\r\n            activated\r\n            config(activated: true) {\r\n                key\r\n                description\r\n                activated\r\n                strategies(activated: true) {\r\n                    strategy\r\n                    activated\r\n                    operation\r\n                    values\r\n                }\r\n                components\r\n            }\r\n        }\r\n    }\r\n}",
-								"variables": ""
+								"query": "query Domain(\r\n    $name: String, \r\n    $environment: String, \r\n    $_component: String) {\r\n    domain(\r\n        name: $name, \r\n        environment: $environment,\r\n         _component: $_component\r\n    ) {\r\n        name\r\n        version\r\n        description\r\n        activated\r\n        group {\r\n            name\r\n            description\r\n            activated\r\n            config {\r\n                key\r\n                description\r\n                activated\r\n                strategies {\r\n                    strategy\r\n                    activated\r\n                    operation\r\n                    values\r\n                }\r\n                relay {\r\n                    type\r\n                    method\r\n                    authPrefix\r\n                    verifiedByEnv { env value }\r\n                    authTokenByEnv { env value }\r\n                    statusByEnv { env value }\r\n                    endpointByEnv { env value }\r\n                }\r\n                components\r\n            }\r\n        }\r\n    }\r\n}",
+								"variables": "{\r\n    \"name\": \"{{domain_name}}\",\r\n    \"environment\": \"{{env_name}}\",\r\n    \"_component\": \"{{component_name}}\"\r\n}"
 							}
 						},
 						"url": {
@@ -453,8 +450,8 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"type": "text",
 						"value": "Bearer",
+						"type": "text",
 						"disabled": true
 					}
 				],
