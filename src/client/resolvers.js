@@ -11,7 +11,7 @@ import { isRelayVerified, isRelayValid } from '../services/config.js';
 
 export const resolveConfigByKey = async (domain, key) => Config.findOne({ domain, key }, null, { lean: true });
 
-export function resolveEnvValue(source, field, keys) {
+export function resolveEnvValue(source, field, keys, environment) {
     const arrValue = [];
 
     keys.forEach(k => {
@@ -20,6 +20,10 @@ export function resolveEnvValue(source, field, keys) {
             value: source[field][k]
         });
     });
+    
+    if (environment) {
+        return arrValue.filter(e => e.env === environment);
+    }
 
     return arrValue;
 }
@@ -32,7 +36,7 @@ export async function resolveConfigStrategy(source, _id, strategy, operation, ac
     if (operation) { args.operation = operation; }
     
     let strategies = await ConfigStrategy.find({ config: source._id, ...args }).lean().exec();
-    const environment = context.environment ? context.environment : EnvType.DEFAULT;
+    const environment = context.environment ?? EnvType.DEFAULT;
 
     strategies = strategies.filter(s => s.activated[environment] !== undefined);
     if (activated !== undefined) {
@@ -44,9 +48,9 @@ export async function resolveConfigStrategy(source, _id, strategy, operation, ac
 
 export async function resolveRelay(source, context) {
     const relay = source.relay;
-    const environment = context.environment ? context.environment : EnvType.DEFAULT;
-
-    if (!relay.type || !relay.activated[environment] || !relay.endpoint[environment]) {
+    const environment = context.environment ?? EnvType.DEFAULT;
+    
+    if (!relay.type || !relay.endpoint[environment] || (relay.activated[environment] == undefined)) {
         return null;
     }
 

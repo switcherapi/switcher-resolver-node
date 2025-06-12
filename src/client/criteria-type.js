@@ -25,10 +25,24 @@ export const responseType = new GraphQLObjectType({
             type: GraphQLString
         },
         domain: {
-            type: domainType
+            type: domainType,
+            resolve: (source) => {
+                return {
+                    name: source.domain.name,
+                    activated: source.domain.activated,
+                    description: source.domain.description
+                };
+            }
         },
         group: {
-            type: groupConfigType
+            type: groupConfigType,
+            resolve: (source) => {
+                return {
+                    name: source.group.name,
+                    activated: source.group.activated,
+                    description: source.group.description
+                };
+            }
         },
         strategies: {
             type: new GraphQLList(strategyType)

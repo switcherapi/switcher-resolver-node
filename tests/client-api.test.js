@@ -7,7 +7,7 @@ import { Config } from '../src/models/config';
 import Component from '../src/models/component';
 import { ConfigStrategy, StrategiesType, OperationsType } from '../src/models/config-strategy';
 import { EnvType } from '../src/models/environment';
-import { adminMasterAccountId } from './fixtures/db_api';
+import { adminMasterAccountId, groupConfigDocument } from './fixtures/db_api';
 import { Metric } from '../src/models/metric';
 import * as graphqlUtils from './graphql-utils';
 import { 
@@ -20,7 +20,11 @@ import {
     domainId,
     domainDocument,
     configStrategyUSERId,
-    component1
+    component1,
+    configStrategyUSERDocument,
+    configStrategyCIDRDocument,
+    configStrategyTIME_GREATDocument,
+    configStrategyTIME_BETWEENDocument
 } from './fixtures/db_client';
 
 const changeStrategy = async (strategyId, newOperation, status, environment) => {
@@ -80,7 +84,7 @@ afterAll(async () => {
     await mongoose.disconnect();
 });
 
-describe('Testing criteria [GraphQL] ', () => {
+describe('Testing criteria [GraphQL]', () => {
     let token;
 
     beforeAll(async () => {
@@ -100,6 +104,32 @@ describe('Testing criteria [GraphQL] ', () => {
             );
 
         const expected = graphqlUtils.criteriaResult('true', 'Success');
+        expect(req.statusCode).toBe(200);
+        expect(JSON.parse(req.text)).toMatchObject(JSON.parse(expected));
+    });
+
+    test('CLIENT_SUITE - Should return success on a detailed CRITERIA response', async () => {
+        const req = await request(app)
+            .post('/graphql')
+            .set('Authorization', `Bearer ${token}`)
+            .send(graphqlUtils.criteriaDetailedQuery(keyConfig, graphqlUtils.buildEntries([
+                [StrategiesType.VALUE, 'USER_1'], 
+                [StrategiesType.NETWORK, '10.0.0.3']]))
+            );
+
+        const expected = graphqlUtils.criteriaDetailedResult(
+            'true',
+            'Success',
+            EnvType.DEFAULT,
+            domainDocument,
+            groupConfigDocument, [
+                configStrategyUSERDocument,
+                configStrategyCIDRDocument,
+                configStrategyTIME_BETWEENDocument,
+                configStrategyTIME_GREATDocument
+            ]
+        );
+        
         expect(req.statusCode).toBe(200);
         expect(JSON.parse(req.text)).toMatchObject(JSON.parse(expected));
     });
@@ -331,7 +361,7 @@ describe('Testing criteria [GraphQL] ', () => {
     });
 });
 
-describe('Testing domain', () => {
+describe('Testing domain [GraphQL]', () => {
     let token;
 
     beforeAll(async () => {
@@ -353,8 +383,8 @@ describe('Testing domain', () => {
         const req = await request(app)
             .post('/graphql')
             .set('Authorization', `Bearer ${token}`)
-            .send(graphqlUtils.domainQuery([['_id', domainId]], true, true, true));
-
+            .send(graphqlUtils.domainQuery([['_id', domainId], ['environment', EnvType.DEFAULT]], true, true, true));
+            
         expect(req.statusCode).toBe(200);
         expect(JSON.parse(req.text)).toMatchObject(JSON.parse(graphqlUtils.expected102));
     });
