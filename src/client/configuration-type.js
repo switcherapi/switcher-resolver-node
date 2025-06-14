@@ -76,28 +76,34 @@ export const relayType = new GraphQLObjectType({
         method: {
             type: GraphQLString,
         },
+        activated: {
+            type: GraphQLBoolean,
+            resolve: (source, _args, { environment }) => {
+                return source.activated[`${environment}`];
+            }
+        },
         verifiedByEnv: {
             type: new GraphQLList(envValue),
-            resolve: (source, _args, context) => {
-                return resolveEnvValue(source, 'verified', Object.keys(source.verified), context.environment);
+            resolve: (source) => {
+                return resolveEnvValue(source, 'verified', Object.keys(source.verified));
             }
         },
         endpointByEnv: {
             type: new GraphQLList(envValue),
-            resolve: (source, _args, context) => {
-                return resolveEnvValue(source, 'endpoint', Object.keys(source.endpoint), context.environment);
+            resolve: (source) => {
+                return resolveEnvValue(source, 'endpoint', Object.keys(source.endpoint));
             }
         },
         statusByEnv: {
             type: new GraphQLList(envStatus),
-            resolve: (source, _args, context) => {
-                return resolveEnvValue(source, 'activated', Object.keys(source.activated), context.environment);
+            resolve: (source) => {
+                return resolveEnvValue(source, 'activated', Object.keys(source.activated));
             }
         },
         authTokenByEnv: {
             type: new GraphQLList(envValue),
-            resolve: (source, _args, context) => {
-                return resolveEnvValue(source, 'auth_token', Object.keys(source.auth_token), context.environment);
+            resolve: (source) => {
+                return resolveEnvValue(source, 'auth_token', Object.keys(source.auth_token));
             }
         },
         authPrefix: {

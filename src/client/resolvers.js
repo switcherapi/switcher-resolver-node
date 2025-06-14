@@ -11,7 +11,7 @@ import { isRelayVerified, isRelayValid } from '../services/config.js';
 
 export const resolveConfigByKey = async (domain, key) => Config.findOne({ domain, key }, null, { lean: true });
 
-export function resolveEnvValue(source, field, keys, environment) {
+export function resolveEnvValue(source, field, keys) {
     const arrValue = [];
 
     keys.forEach(k => {
@@ -21,10 +21,6 @@ export function resolveEnvValue(source, field, keys, environment) {
         });
     });
     
-    if (environment) {
-        return arrValue.filter(e => e.env === environment);
-    }
-
     return arrValue;
 }
 
