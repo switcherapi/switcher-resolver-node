@@ -2,51 +2,27 @@ export const domainQuery = (id) => `
     query {
         domain(_id: "${id}") {
             version
-            statusByEnv {
-                env
-                value
-            }
+            statusByEnv { env value }
             group {
-                statusByEnv {
-                    env
-                    value
-                }
+                statusByEnv { env value }
                 config {
                     key
                     components
-                    statusByEnv {
-                        env
-                        value
-                    }
+                    statusByEnv { env value }
                     strategies {
                         strategy
                         operation
                         values
-                        statusByEnv {
-                            env
-                            value
-                        }
+                        statusByEnv { env value }
                     }
                     relay {
                         type
                         method
                         authPrefix
-                        authTokenByEnv {
-                            env
-                            value
-                        }
-                        endpointByEnv {
-                            env
-                            value
-                        }
-                        statusByEnv {
-                            env
-                            value
-                        }
-                        verifiedByEnv {
-                            env
-                            value
-                        }
+                        authTokenByEnv { env value }
+                        endpointByEnv { env value }
+                        statusByEnv { env value }
+                        verifiedByEnv { env value }
                     }
                 }
             }

@@ -22,18 +22,10 @@ export const domainQuery = (where, group, config, strategy) => {
                             relay {
                                 type
                                 method
-                                endpointByEnv {
-                                    env
-                                    value
-                                }
-                                statusByEnv {
-                                    env
-                                    value
-                                }
-                                statusByEnv {
-                                    env
-                                    value
-                                }
+                                activated
+                                endpointByEnv { env value }
+                                statusByEnv { env value }
+                                statusByEnv { env value }
                             }
                             components
                         }
@@ -175,6 +167,7 @@ export const expected102 = `
                     "relay": {
                         "type": "NOTIFICATION",
                         "method": "POST",
+                        "activated": false,
                         "endpointByEnv": [{
                             "env": "default",
                             "value": "http://localhost:3000"
