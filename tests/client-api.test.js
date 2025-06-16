@@ -379,14 +379,14 @@ describe('Testing domain [GraphQL]', () => {
 
     afterAll(setupDatabase);
 
-    test('CLIENT_SUITE - Should return the Domain structure', async () => {
+    test('CLIENT_SUITE - Should return the Domain structure for Environment (default)', async () => {
         const req = await request(app)
             .post('/graphql')
             .set('Authorization', `Bearer ${token}`)
-            .send(graphqlUtils.domainQuery([['_id', domainId], ['environment', EnvType.DEFAULT]], true, true, true));
+            .send(graphqlUtils.domainQuery([['_id', domainId], ['environment', EnvType.DEFAULT]]));
             
         expect(req.statusCode).toBe(200);
-        expect(JSON.parse(req.text)).toMatchObject(JSON.parse(graphqlUtils.expected102));
+        expect(JSON.parse(req.text)).toMatchObject(JSON.parse(graphqlUtils.expected102Default));
     });
 
     test('CLIENT_SUITE - Should return 2 switchers when NOT filtered by Component', async () => {

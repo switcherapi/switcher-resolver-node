@@ -32,25 +32,31 @@ export async function resolveConfigStrategy(source, _id, strategy, operation, ac
     if (operation) { args.operation = operation; }
     
     let strategies = await ConfigStrategy.find({ config: source._id, ...args }).lean().exec();
-    const environment = context.environment ?? EnvType.DEFAULT;
+    const environment = context.environment;
 
-    strategies = strategies.filter(s => s.activated[environment] !== undefined);
-    if (activated !== undefined) {
-        strategies = strategies.filter(s => s.activated[environment] === activated);
+    if (environment) {
+        strategies = strategies.filter(s => s.activated[environment] !== undefined);
+        if (activated !== undefined) {
+            strategies = strategies.filter(s => s.activated[environment] === activated);
+        }
     }
 
     return strategies;
 }
 
 export async function resolveRelay(source, context) {
-    const relay = source.relay;
-    const environment = context.environment ?? EnvType.DEFAULT;
-    
-    if (!relay.type || !relay.endpoint[environment] || (relay.activated[environment] == undefined)) {
+    const { relay } = source;
+    const { environment } = context;
+
+    if (environment) {
+        if (relay.activated && relay.activated[environment] !== undefined) { 
+            return relay;
+        }
+
         return null;
     }
-
-    return relay;
+    
+    return relay.type ? relay : null;
 }
 
 export async function resolveConfig(source, _id, key, activated, context) {

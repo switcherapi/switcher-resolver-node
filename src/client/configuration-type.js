@@ -51,8 +51,10 @@ const commonFieldsType = {
 export const strategyType = new GraphQLObjectType({
     name: 'Strategy',
     fields: {
-        ...commonFieldsType,
         _id: {
+            type: GraphQLString
+        },
+        description: {
             type: GraphQLString
         },
         strategy: {
@@ -63,7 +65,19 @@ export const strategyType = new GraphQLObjectType({
         },
         values: {
             type: new GraphQLList(GraphQLString)
+        },
+        activated: {
+            type: GraphQLBoolean,
+            resolve: (source, _args, { environment }) => {
+                return source.activated[`${environment}`];
+            }
+        },
+        statusByEnv: {
+            type: new GraphQLList(envStatus),
+            resolve: (source) => {
+                return resolveEnvValue(source, 'activated', Object.keys(source.activated));
         }
+    }
     }
 });
 
@@ -75,6 +89,9 @@ export const relayType = new GraphQLObjectType({
         },
         method: {
             type: GraphQLString,
+        },
+        description: {
+            type: GraphQLString
         },
         activated: {
             type: GraphQLBoolean,
@@ -202,9 +219,6 @@ export const domainType = new GraphQLObjectType({
             resolve: (source) => source.lastUpdate
         },
         name: {
-            type: GraphQLString
-        },
-        description: {
             type: GraphQLString
         },
         owner: {
