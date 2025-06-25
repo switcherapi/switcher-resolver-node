@@ -3,7 +3,7 @@ import { body, check, query, header } from 'express-validator';
 import jwt from 'jsonwebtoken';
 import { checkConfig, checkConfigComponent, validate } from '../middleware/validators.js';
 import { appAuth, appGenerateCredentials } from '../middleware/auth.js';
-import { resolveCriteria, findDomain } from '../client/resolvers.js';
+import { resolveCriteria, findDomain } from '../aggregator/resolvers.js';
 import { getConfigs } from '../services/config.js';
 import { clientLimiter } from '../middleware/limiter.js';
 import { StrategiesType } from '../models/config-strategy.js';

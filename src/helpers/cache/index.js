@@ -1,5 +1,5 @@
 import { graphql } from 'graphql';
-import schema from '../../client/schema.js';
+import schema from '../../aggregator/schema.js';
 import { getAllDomains } from '../../services/domain.js';
 import { domainQuery, reduceSnapshot } from './query.js';
 

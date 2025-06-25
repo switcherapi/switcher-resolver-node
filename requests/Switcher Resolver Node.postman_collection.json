@@ -311,7 +311,7 @@
 			]
 		},
 		{
-			"name": "GraphqQL",
+			"name": "Aggregator API (GraphqQL)",
 			"item": [
 				{
 					"name": "Resolve criteria - detailed",

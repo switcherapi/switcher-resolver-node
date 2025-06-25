@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { resolveValidation } from '../../../src/client/relay';
+import { resolveValidation } from '../../../src/services/relay';
 import sinon from 'sinon';
 import axios from 'axios';
 import { RelayMethods } from '../../../src/models/config';

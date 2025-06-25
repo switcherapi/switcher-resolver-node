@@ -4,7 +4,7 @@ import GroupConfig from '../models/group-config.js';
 import { Config, RelayTypes} from '../models/config.js';
 import { addMetrics } from '../models/metric.js';
 import { ConfigStrategy, processOperation } from '../models/config-strategy.js';
-import { resolveNotification, resolveValidation } from './relay/index.js';
+import { resolveNotification, resolveValidation } from '../services/relay.js';
 import Component from '../models/component.js';
 import Logger from '../helpers/logger.js';
 import { isRelayVerified, isRelayValid } from '../services/config.js';
