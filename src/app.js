@@ -9,7 +9,7 @@ import './db/mongoose.js';
 import mongoose from 'mongoose';
 import swaggerDocument from './api-docs/swagger-document.js';
 import clientApiRouter from './routers/client-api.js';
-import schema from './client/schema.js';
+import schema from './aggregator/schema.js';
 import { appAuth, resourcesAuth } from './middleware/auth.js';
 import { clientLimiter, defaultLimiter } from './middleware/limiter.js';
 import { createServer } from './app-server.js';
