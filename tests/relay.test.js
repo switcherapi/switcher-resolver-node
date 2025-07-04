@@ -91,10 +91,10 @@ describe('Testing Switcher Relay', () => {
     afterAll(setupDatabase);
 
     test('RELAY_SUITE - Should return success when validating relay using GET method', async () => {
-        // Mock
+        // mock
         axiosStub = sinon.stub(axios, 'get');
 
-        // Given
+        // given
         const mockRelayService = { data: { result: true, message: 'A message', metadata: { custom: 'VALUE' } } };
         axiosStub.returns(Promise.resolve(mockRelayService));
 
@@ -103,7 +103,7 @@ describe('Testing Switcher Relay', () => {
         config.relay = bodyRelay(RelayMethods.GET, RelayTypes.VALIDATION);
         await config.save();
 
-        // Test
+        // test
         const req = await request(app)
             .post(`/criteria?key=${keyConfig}&showReason=true&showStrategy=true`)
             .set('Authorization', `Bearer ${token}`)
@@ -128,10 +128,10 @@ describe('Testing Switcher Relay', () => {
     });
 
     test('RELAY_SUITE - Should return success when validating relay using POST method', async () => {
-        // Mock
+        // mock
         axiosStub = sinon.stub(axios, 'post');
 
-        // Given
+        // given
         const mockRelayService = { data: { result: true, reason: 'Success' } };
         axiosStub.returns(Promise.resolve(mockRelayService));
 
@@ -140,7 +140,7 @@ describe('Testing Switcher Relay', () => {
         config.relay = bodyRelay(RelayMethods.POST, RelayTypes.VALIDATION);
         await config.save();
 
-        // Test
+        // test
         const req = await request(app)
             .post(`/criteria?key=${keyConfig}&showReason=true&showStrategy=true`)
             .set('Authorization', `Bearer ${token}`)
@@ -163,10 +163,10 @@ describe('Testing Switcher Relay', () => {
     });
 
     test('RELAY_SUITE - Should return success when notifying relay using GET method', async () => {
-        // Mock
+        // mock
         axiosStub = sinon.stub(axios, 'get');
 
-        // Given - altough it's not considered after invoking the relay
+        // given - altough it's not considered after invoking the relay
         const mockRelayService = { data: { result: true, reason: 'Success' } };
         axiosStub.returns(Promise.resolve(mockRelayService));
 
@@ -175,7 +175,7 @@ describe('Testing Switcher Relay', () => {
         config.relay = bodyRelay(RelayMethods.GET, RelayTypes.NOTIFICATION);
         await config.save();
             
-        // Test
+        // test
         const req = await request(app)
             .post(`/criteria?key=${keyConfig}&showReason=true&showStrategy=true`)
             .set('Authorization', `Bearer ${token}`)
@@ -198,10 +198,10 @@ describe('Testing Switcher Relay', () => {
     });
 
     test('RELAY_SUITE - Should return success when notifying relay using POST method', async () => {
-        // Mock
+        // mock
         axiosStub = sinon.stub(axios, 'post');
 
-        // Given - altough it's not considered after invoking the relay
+        // given - altough it's not considered after invoking the relay
         const mockRelayService = { data: { result: true, reason: 'Success' } };
         axiosStub.returns(Promise.resolve(mockRelayService));
 
@@ -210,7 +210,7 @@ describe('Testing Switcher Relay', () => {
         config.relay = bodyRelay(RelayMethods.POST, RelayTypes.NOTIFICATION);
         await config.save();
 
-        // Test
+        // test
        const req = await request(app)
             .post(`/criteria?key=${keyConfig}&showReason=true&showStrategy=true`)
             .set('Authorization', `Bearer ${token}`)
@@ -233,10 +233,10 @@ describe('Testing Switcher Relay', () => {
     });
 
     test('RELAY_SUITE - Should return success when validating relay using GET method - no input', async () => {
-        // Mock
+        // mock
         axiosStub = sinon.stub(axios, 'get');
 
-        // Given
+        // given
         const mockRelayService = { data: { result: true, reason: 'Success' } };
         axiosStub.returns(Promise.resolve(mockRelayService));
 
@@ -249,7 +249,7 @@ describe('Testing Switcher Relay', () => {
         await changeStrategy(configStrategyUSERId, undefined, false, EnvType.DEFAULT);
         await changeStrategy(configStrategyCIDRId, undefined, false, EnvType.DEFAULT);
 
-        // Test
+        // test
         const req = await request(app)
             .post(`/criteria?key=${keyConfig}&showReason=true&showStrategy=true`)
             .set('Authorization', `Bearer ${token}`)
@@ -262,10 +262,10 @@ describe('Testing Switcher Relay', () => {
     });
 
     test('RELAY_SUITE - Should return success when validating relay using POST method - no input', async () => {
-        // Mock
+        // mock
         axiosStub = sinon.stub(axios, 'post');
 
-        // Given
+        // given
         const mockRelayService = { data: { result: true, reason: 'Success' } };
         axiosStub.returns(Promise.resolve(mockRelayService));
 
@@ -278,7 +278,7 @@ describe('Testing Switcher Relay', () => {
         await changeStrategy(configStrategyUSERId, undefined, false, EnvType.DEFAULT);
         await changeStrategy(configStrategyCIDRId, undefined, false, EnvType.DEFAULT);
 
-        // Test
+        // test
         const req = await request(app)
             .post(`/criteria?key=${keyConfig}&showReason=true&showStrategy=true`)
             .set('Authorization', `Bearer ${token}`)
@@ -291,7 +291,7 @@ describe('Testing Switcher Relay', () => {
     });
 
     test('RELAY_SUITE - Should NOT return success when validating relay using GET method - Service exception', async () => {
-        // Mock
+        // mock
         axiosStub = sinon.stub(axios, 'get');
         axiosStub.throwsException();
 
@@ -300,7 +300,7 @@ describe('Testing Switcher Relay', () => {
         config.relay = bodyRelay(RelayMethods.GET, RelayTypes.VALIDATION);
         await config.save();
 
-        // Test
+        // test
         const req = await request(app)
             .post(`/criteria?key=${keyConfig}&showReason=true&showStrategy=true`)
             .set('Authorization', `Bearer ${token}`)
@@ -313,7 +313,7 @@ describe('Testing Switcher Relay', () => {
     });
 
     test('RELAY_SUITE - Should NOT return success when validating relay using POST method - Service exception', async () => {
-        // Mock
+        // mock
         axiosStub = sinon.stub(axios, 'post');
         axiosStub.throwsException();
 
@@ -322,7 +322,7 @@ describe('Testing Switcher Relay', () => {
         config.relay = bodyRelay(RelayMethods.POST, RelayTypes.VALIDATION);
         await config.save();
 
-        // Test
+        // test
         const req = await request(app)
             .post(`/criteria?key=${keyConfig}&showReason=true&showStrategy=true`)
             .set('Authorization', `Bearer ${token}`)
@@ -358,7 +358,7 @@ describe('Testing Switcher Relay Validation', () => {
     });
 
     test('RELAY_SUITE - Should return Relay could not be reached - Relay HTTPS required', async () => {
-        // Given
+        // given
         // HTTPS not required
         process.env.RELAY_BYPASS_HTTPS = true;
 
@@ -370,7 +370,7 @@ describe('Testing Switcher Relay Validation', () => {
         // HTTPS required
         process.env.RELAY_BYPASS_HTTPS = false;
 
-        // Test
+        // test
         const req = await request(app)
             .post(`/criteria?key=${keyConfig}&showReason=true&showStrategy=true`)
             .set('Authorization', `Bearer ${token}`)
@@ -415,7 +415,7 @@ describe('Testing Switcher Relay Verification', () => {
     });
 
     test('RELAY_SUITE - Should return Relay could not be reached - Not verified', async () => {
-        // Given
+        // given
         // Verification required
         process.env.RELAY_BYPASS_VERIFICATION = false;
 
@@ -424,7 +424,7 @@ describe('Testing Switcher Relay Verification', () => {
         config.relay = bodyRelay('https://localhost:3001');
         await config.save();
 
-        // Test
+        // test
         const req = await request(app)
             .post(`/criteria?key=${keyConfig}&showReason=true&showStrategy=true`)
             .set('Authorization', `Bearer ${token}`)
@@ -445,10 +445,10 @@ describe('Testing Switcher Relay Verification', () => {
     });
 
     test('RELAY_SUITE - Should return success when validating verified relay', async () => {
-        // Mock
+        // mock
         axiosStub = sinon.stub(axios, 'get');
 
-        // Given
+        // given
         const mockRelayService = { data: { result: true, reason: 'Success' } };
         axiosStub.returns(Promise.resolve(mockRelayService));
 
@@ -466,7 +466,7 @@ describe('Testing Switcher Relay Verification', () => {
         await config.save();
         expect(config.relay.verified.get(EnvType.DEFAULT)).toBe(true);
 
-        // Test
+        // test
         const req = await request(app)
             .post(`/criteria?key=${keyConfig}&showReason=true&showStrategy=true`)
             .set('Authorization', `Bearer ${token}`)

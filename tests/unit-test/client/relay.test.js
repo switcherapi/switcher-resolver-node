@@ -23,10 +23,10 @@ describe('Testing Client Relay', () => {
     });
 
     test('CLIENT_RELAY_SUITE - Should resolve validation', async () => {
-        // Mock
+        // mock
         axiosStub = sinon.stub(axios, 'get');
 
-        // Given
+        // given
         const mockRelayService = { data: { result: true, reason: 'Success' } };
         axiosStub.returns(Promise.resolve(mockRelayService));
         Client.assume('HTTPS_AGENT').true();
