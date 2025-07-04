@@ -18,7 +18,7 @@ describe('Testing component authentication', () => {
     beforeAll(async () => await setupDatabase());
 
     test('COMPONENT_MODEL - Should authenticate component using new API key format', async () => {
-        // Given
+        // given
         const componentId = new mongoose.Types.ObjectId();
         const component = new Component({
             _id: componentId,
@@ -31,7 +31,7 @@ describe('Testing component authentication', () => {
         // That
         const generatedApiKey = await component.generateApiKey();
         
-        // Test
+        // test
         const result = await Component.findByCredentials(domainDocument.name, component.name, generatedApiKey);
         expect(result.component).not.toBe(undefined);
     });

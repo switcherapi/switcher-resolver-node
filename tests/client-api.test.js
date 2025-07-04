@@ -326,7 +326,7 @@ describe('Testing criteria [GraphQL]', () => {
     });
 
     test('CLIENT_SUITE - Should not add to metrics when Config has disabled metric flag = true', async () => {
-        //given
+        // given
         await changeConfigStatus(configId, true, EnvType.DEFAULT);
 
         //add one metric data
@@ -355,7 +355,7 @@ describe('Testing criteria [GraphQL]', () => {
             )
             .expect(200);
 
-        //test
+        // test
         const afterNumMetricData = await Metric.find({ config: configId }).countDocuments().exec();
         expect(numMetricData === afterNumMetricData).toBe(true);
     });
@@ -565,7 +565,7 @@ describe('Testing criteria [REST] ', () => {
     });
 
     test('CLIENT_SUITE - Should NOT return success on a entry-based CRITERIA response - Component not registered', async () => {
-        // Given
+        // given
         const component = new Component({
             _id: new mongoose.Types.ObjectId(),
             name: 'Temp Component',
@@ -586,7 +586,7 @@ describe('Testing criteria [REST] ', () => {
 
         const tempToken = response.body.token;
 
-        // Test
+        // test
         const req = await request(app)
             .post(`/criteria?key=${keyConfig}&showReason=true&showStrategy=true`)
             .set('Authorization', `Bearer ${tempToken}`)
