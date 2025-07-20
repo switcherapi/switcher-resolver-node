@@ -1,6 +1,6 @@
 export default {
     title: 'Switcher Resolver Node',
-    version: 'v1.0.1',
+    version: 'v1.1.0',
     description: 'Resolver Node for Component Switchers.',
     contact: {
         name: 'Roger Floriano (petruki)',
