@@ -2,18 +2,23 @@ import { graphql } from 'graphql';
 import schema from '../../aggregator/schema.js';
 import { getAllDomains } from '../../services/domain.js';
 import { domainQuery, reduceSnapshot } from './query.js';
+import { CacheWorkerManager } from './worker-manager.js';
+import Logger from '../logger.js';
 
 export default class Cache {
     #instance;
+    #workerManager;
 
     constructor() {
         this.#instance = new Map();
+        this.#workerManager = null;
     }
 
     static getInstance() {
         if (!Cache.instance) {
             Cache.instance = new Cache();
         }
+        
         return Cache.instance;
     }
 
@@ -25,6 +30,29 @@ export default class Cache {
         }
     }
 
+    async startScheduledUpdates(options = {}) {
+        this.#workerManager = new CacheWorkerManager(options);
+        
+        this.#workerManager.setOnCacheUpdates((updates) => 
+            this.#handleCacheUpdates(updates));
+
+        this.#workerManager.setOnCacheVersionRequest((domainId) => 
+            this.#handleCacheVersionRequest(domainId));
+
+        this.#workerManager.setOnError((error) => {
+            Logger.error('Cache worker error:', error);
+        });
+
+        await this.#workerManager.start();
+    }
+
+    async stopScheduledUpdates() {
+        if (this.#workerManager) {
+            await this.#workerManager.stop();
+            this.#workerManager = null;
+        }
+    }
+
     async #updateCache(domain) {
         const result = await graphql({
             schema,
@@ -32,11 +60,38 @@ export default class Cache {
             contextValue: { domain: domain._id }
         });
 
-        this.#set(domain._id, reduceSnapshot(result.data.domain));
+        this.#set(domain._id, {
+            data: reduceSnapshot(result.data.domain),
+            lastUpdate: domain.lastUpdate,
+            version: result.data.domain.version
+        });
+    }
+
+    #handleCacheUpdates(updates) {
+        for (const update of updates) {
+            this.#set(update.domainId, {
+                data: update.data,
+                lastUpdate: update.lastUpdate,
+                version: update.version
+            });
+        }
+    }
+
+    #handleCacheVersionRequest(domainId) {
+        const cached = this.#instance.get(String(domainId));
+        const cachedVersion = cached?.lastUpdate || null;
+        
+        if (this.#workerManager) {
+            this.#workerManager.sendCacheVersionResponse(domainId, cachedVersion);
+        }
     }
 
     #set(key, value) {
         this.#instance.set(String(key), value);
+    }
+    
+    status() {
+        return this.#workerManager.getStatus();
     }
 
     get(key) {
