@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
-import '../../src/db/mongoose';
+import '../../../src/db/mongoose';
 
-import { domainId, setupDatabase } from '../fixtures/db_api';
-import Domain from '../../src/models/domain';
-import Cache from '../../src/helpers/cache';
+import { domainId, setupDatabase } from '../../fixtures/db_api';
+import Domain from '../../../src/models/domain';
+import Cache from '../../../src/helpers/cache';
 
 let cache;
 
@@ -24,7 +24,7 @@ describe('Test cache', () => {
         await cache.stopScheduledUpdates();
     });
 
-    test('UNIT_SUITE - Should initialize cache', async () => {
+    test('CACHE_SUITE - Should initialize cache', async () => {
         // test
         cache = Cache.getInstance();
         await cache.initializeCache();
@@ -37,7 +37,7 @@ describe('Test cache', () => {
         expect(cacheSingle).toBeDefined();
     });
 
-    test('UNIT_SUITE - Should initialize schduled cache update', async () => {
+    test('CACHE_SUITE - Should initialize schduled cache update', async () => {
         // test
         cache = Cache.getInstance();
         await cache.initializeCache();
@@ -47,7 +47,7 @@ describe('Test cache', () => {
         expect(cache.status()).toBe('running');
     });
 
-    test('UNIT_SUITE - Should update cache when new Domain version is available', async () => {
+    test('CACHE_SUITE - Should update cache when new Domain version is available', async () => {
         // test
         cache = Cache.getInstance();
         await cache.initializeCache();
@@ -65,7 +65,7 @@ describe('Test cache', () => {
         expect(updatedSuccessfully).toBe(true);
     }, 20000);
 
-    test('UNIT_SUITE - Should update cache when new Domain is created', async () => {
+    test('CACHE_SUITE - Should update cache when new Domain is created', async () => {
         // test
         cache = Cache.getInstance();
         await cache.initializeCache();
@@ -83,7 +83,7 @@ describe('Test cache', () => {
         expect(updatedSuccessfully).toBe(true);
     }, 20000);
 
-    test('UNIT_SUITE - Should update cache when Domain is deleted', async () => {
+    test('CACHE_SUITE - Should update cache when Domain is deleted', async () => {
         // test
         cache = Cache.getInstance();
         await cache.initializeCache();
