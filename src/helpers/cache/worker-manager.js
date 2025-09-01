@@ -12,8 +12,11 @@ export const EVENT_TYPE = {
     STOPPED: 'stopped',
     READY: 'ready',
     CACHE_UPDATES: 'cache-updates',
+    CACHE_DELETIONS: 'cache-deletions',
     REQUEST_CACHE_VERSION: 'request-cache-version',
     CACHE_VERSION_RESPONSE: 'cache-version-response',
+    REQUEST_CACHED_DOMAIN_IDS: 'request-cached-domain-ids',
+    CACHED_DOMAIN_IDS_RESPONSE: 'cached-domain-ids-response',
     ERROR: 'error'
 };
 
@@ -30,53 +33,69 @@ export class CacheWorkerManager {
     constructor(options = {}) {
         this.worker = null;
         this.status = STATUS_TYPE.STOPPED;
+        this.onCacheUpdates = null;
+        this.onCacheDeletions = null;
+        this.onCachedDomainIdsRequest = null;
+        this.onError = null;
         this.options = {
             interval: this.DEFAULT_INTERVAL,
             ...options
         };
-        this.onCacheUpdates = null;
-        this.onError = null;
+    }
+
+    #buildEvents(resolve) {
+        return new Map([
+            [EVENT_TYPE.READY, () => {
+                this.worker.postMessage({ type: EVENT_TYPE.START });
+            }],
+            [EVENT_TYPE.STARTED, () => {
+                this.status = STATUS_TYPE.RUNNING;
+                resolve();
+            }],
+            [EVENT_TYPE.STOPPED, () => {
+                this.status = STATUS_TYPE.STOPPED;
+            }],
+            [EVENT_TYPE.CACHE_UPDATES, (message) => {
+                if (this.onCacheUpdates) {
+                    this.onCacheUpdates(message.updates);
+                }
+            }],
+            [EVENT_TYPE.CACHE_DELETIONS, (message) => {
+                if (this.onCacheDeletions) {
+                    this.onCacheDeletions(message.deletions);
+                }
+            }],
+            [EVENT_TYPE.REQUEST_CACHE_VERSION, (message) => {
+                if (this.onCacheVersionRequest) {
+                    this.onCacheVersionRequest(message.domainId);
+                }
+            }],
+            [EVENT_TYPE.REQUEST_CACHED_DOMAIN_IDS, () => {
+                if (this.onCachedDomainIdsRequest) {
+                    this.onCachedDomainIdsRequest();
+                }
+            }],
+            [EVENT_TYPE.ERROR, (message) => {
+                if (this.onError) {
+                    this.onError(new Error(message.error));
+                }
+            }]
+        ]);
     }
 
     start() {
         return new Promise((resolve, reject) => {
             const workerPath = join(__dirname, 'worker.js');
+            const eventHandlers = this.#buildEvents(resolve);
+
             this.worker = new Worker(workerPath, {
                 workerData: this.options
             });
 
             this.worker.on('message', (message) => {
-                switch (message.type) {
-                    case EVENT_TYPE.READY:
-                        this.worker.postMessage({ type: EVENT_TYPE.START });
-                        break;
-
-                    case EVENT_TYPE.STARTED:
-                        this.status = STATUS_TYPE.RUNNING;
-                        resolve();
-                        break;
-
-                    case EVENT_TYPE.STOPPED:
-                        this.status = STATUS_TYPE.STOPPED;
-                        break;
-
-                    case EVENT_TYPE.CACHE_UPDATES:
-                        if (this.onCacheUpdates) {
-                            this.onCacheUpdates(message.updates);
-                        }
-                        break;
-
-                    case EVENT_TYPE.REQUEST_CACHE_VERSION:
-                        if (this.onCacheVersionRequest) {
-                            this.onCacheVersionRequest(message.domainId);
-                        }
-                        break;
-
-                    case EVENT_TYPE.ERROR:
-                        if (this.onError) {
-                            this.onError(new Error(message.error));
-                        }
-                        break;
+                const handler = eventHandlers.get(message.type);
+                if (handler) {
+                    handler(message);
                 }
             });
 
@@ -129,8 +148,6 @@ export class CacheWorkerManager {
             };
 
             this.worker.on('message', onMessage);
-
-            // Send stop message
             this.worker.postMessage({ type: EVENT_TYPE.STOP });
         });
     }
@@ -143,8 +160,16 @@ export class CacheWorkerManager {
         this.onCacheUpdates = callback;
     }
 
+    setOnCacheDeletions(callback) {
+        this.onCacheDeletions = callback;
+    }
+
     setOnCacheVersionRequest(callback) {
         this.onCacheVersionRequest = callback;
+    }
+
+    setOnCachedDomainIdsRequest(callback) {
+        this.onCachedDomainIdsRequest = callback;
     }
 
     sendCacheVersionResponse(domainId, cachedVersion) {
@@ -153,6 +178,15 @@ export class CacheWorkerManager {
                 type: EVENT_TYPE.CACHE_VERSION_RESPONSE,
                 domainId,
                 cachedVersion
+            });
+        }
+    }
+
+    sendCachedDomainIdsResponse(domainIds) {
+        if (this.worker && this.status === STATUS_TYPE.RUNNING) {
+            this.worker.postMessage({
+                type: EVENT_TYPE.CACHED_DOMAIN_IDS_RESPONSE,
+                domainIds
             });
         }
     }
