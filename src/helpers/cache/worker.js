@@ -50,7 +50,7 @@ async function refreshCache() {
     isRunning = true;
     
     try {
-        const domains = await getAllDomains();
+        const domains = await getAllDomains('lastUpdate');
         const deletions = await checkForDeletions(domains);
         const updates = await checkForDomainUpdates(domains);
         
@@ -81,17 +81,13 @@ async function refreshCache() {
 async function checkForDeletions(domains) {
     const deletions = [];
     
-    try {
-        const currentDomainIds = new Set(domains.map(domain => domain._id.toString()));
-        const cachedDomainIds = await getAllCachedDomainIds();
+    const currentDomainIds = new Set(domains.map(domain => domain._id.toString()));
+    const cachedDomainIds = await getAllCachedDomainIds();
 
-        for (const cachedDomainId of cachedDomainIds) {
-            if (!currentDomainIds.has(cachedDomainId)) {
-                deletions.push(cachedDomainId);
-            }
+    for (const cachedDomainId of cachedDomainIds) {
+        if (!currentDomainIds.has(cachedDomainId)) {
+            deletions.push(cachedDomainId);
         }
-    } catch (error) {
-        Logger.error('Error checking for deletions:', error);
     }
     
     return deletions;

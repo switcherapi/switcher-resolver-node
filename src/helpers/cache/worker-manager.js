@@ -30,13 +30,15 @@ export const STATUS_TYPE = {
 export class CacheWorkerManager {
     DEFAULT_INTERVAL = 5000;
 
-    constructor(options = {}) {
+    constructor(eventHandlers, options) {
         this.worker = null;
         this.status = STATUS_TYPE.STOPPED;
-        this.onCacheUpdates = null;
-        this.onCacheDeletions = null;
-        this.onCachedDomainIdsRequest = null;
-        this.onError = null;
+        this.onCacheUpdates = eventHandlers.onCacheUpdates;
+        this.onCacheDeletions = eventHandlers.onCacheDeletions;
+        this.onCachedDomainIdsRequest = eventHandlers.onCachedDomainIdsRequest;
+        this.onCacheVersionRequest = eventHandlers.onCacheVersionRequest;
+        this.onError = eventHandlers.onError;
+        
         this.options = {
             interval: this.DEFAULT_INTERVAL,
             ...options
@@ -56,35 +58,25 @@ export class CacheWorkerManager {
                 this.status = STATUS_TYPE.STOPPED;
             }],
             [EVENT_TYPE.CACHE_UPDATES, (message) => {
-                if (this.onCacheUpdates) {
-                    this.onCacheUpdates(message.updates);
-                }
+                this.onCacheUpdates(message.updates);
             }],
             [EVENT_TYPE.CACHE_DELETIONS, (message) => {
-                if (this.onCacheDeletions) {
-                    this.onCacheDeletions(message.deletions);
-                }
+                this.onCacheDeletions(message.deletions);
             }],
             [EVENT_TYPE.REQUEST_CACHE_VERSION, (message) => {
-                if (this.onCacheVersionRequest) {
-                    this.onCacheVersionRequest(message.domainId);
-                }
+                this.onCacheVersionRequest(message.domainId);
             }],
             [EVENT_TYPE.REQUEST_CACHED_DOMAIN_IDS, () => {
-                if (this.onCachedDomainIdsRequest) {
-                    this.onCachedDomainIdsRequest();
-                }
+                this.onCachedDomainIdsRequest();
             }],
             [EVENT_TYPE.ERROR, (message) => {
-                if (this.onError) {
-                    this.onError(new Error(message.error));
-                }
+                this.onError(new Error(message.error));
             }]
         ]);
     }
 
     start() {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             const workerPath = join(__dirname, 'worker.js');
             const eventHandlers = this.#buildEvents(resolve);
 
@@ -93,20 +85,9 @@ export class CacheWorkerManager {
             });
 
             this.worker.on('message', (message) => {
-                const handler = eventHandlers.get(message.type);
-                if (handler) {
-                    handler(message);
-                }
+                eventHandlers.get(message.type)(message);
             });
-
-            this.worker.on('error', (error) => {
-                this.status = STATUS_TYPE.ERROR;
-                if (this.onError) {
-                    this.onError(error);
-                }
-                reject(error);
-            });
-
+            
             this.worker.on('exit', (code) => {
                 const wasTerminating = this.status === STATUS_TYPE.STOPPING;
                 this.status = STATUS_TYPE.STOPPED;
@@ -124,15 +105,13 @@ export class CacheWorkerManager {
     }
 
     stop() {
-        this.status = STATUS_TYPE.STOPPING;
-
         return new Promise((resolve) => {
             const cleanup = () => {
                 if (this.worker) {
                     this.worker.terminate();
                     this.worker = null;
                 }
-                this.status = STATUS_TYPE.STOPPED;
+                this.status = STATUS_TYPE.STOPPING;
                 resolve();
             };
 
@@ -156,22 +135,6 @@ export class CacheWorkerManager {
         return this.status;
     }
 
-    setOnCacheUpdates(callback) {
-        this.onCacheUpdates = callback;
-    }
-
-    setOnCacheDeletions(callback) {
-        this.onCacheDeletions = callback;
-    }
-
-    setOnCacheVersionRequest(callback) {
-        this.onCacheVersionRequest = callback;
-    }
-
-    setOnCachedDomainIdsRequest(callback) {
-        this.onCachedDomainIdsRequest = callback;
-    }
-
     sendCacheVersionResponse(domainId, cachedVersion) {
         if (this.worker && this.status === STATUS_TYPE.RUNNING) {
             this.worker.postMessage({
@@ -189,9 +152,5 @@ export class CacheWorkerManager {
                 domainIds
             });
         }
-    }
-
-    setOnError(callback) {
-        this.onError = callback;
     }
 }

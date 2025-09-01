@@ -31,23 +31,13 @@ export default class Cache {
     }
 
     async startScheduledUpdates(options = {}) {
-        this.#workerManager = new CacheWorkerManager(options);
-        
-        this.#workerManager.setOnCacheUpdates((updates) => 
-            this.#handleCacheUpdates(updates));
-
-        this.#workerManager.setOnCacheDeletions((deletions) => 
-            this.#handleCacheDeletions(deletions));
-
-        this.#workerManager.setOnCacheVersionRequest((domainId) => 
-            this.#handleCacheVersionRequest(domainId));
-
-        this.#workerManager.setOnCachedDomainIdsRequest(() => 
-            this.#handleCachedDomainIdsRequest());
-
-        this.#workerManager.setOnError((error) => {
-            Logger.error('Cache worker error:', error);
-        });
+        this.#workerManager = new CacheWorkerManager({
+            onCacheUpdates: (updates) => this.#handleCacheUpdates(updates),
+            onCacheDeletions: (deletions) => this.#handleCacheDeletions(deletions),
+            onCacheVersionRequest: (domainId) => this.#handleCacheVersionRequest(domainId),
+            onCachedDomainIdsRequest: () => this.#handleCachedDomainIdsRequest(),
+            onError: (error) => Logger.error('Cache worker error:', error)
+        }, options);
 
         await this.#workerManager.start();
     }
