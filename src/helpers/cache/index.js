@@ -36,8 +36,14 @@ export default class Cache {
         this.#workerManager.setOnCacheUpdates((updates) => 
             this.#handleCacheUpdates(updates));
 
+        this.#workerManager.setOnCacheDeletions((deletions) => 
+            this.#handleCacheDeletions(deletions));
+
         this.#workerManager.setOnCacheVersionRequest((domainId) => 
             this.#handleCacheVersionRequest(domainId));
+
+        this.#workerManager.setOnCachedDomainIdsRequest(() => 
+            this.#handleCachedDomainIdsRequest());
 
         this.#workerManager.setOnError((error) => {
             Logger.error('Cache worker error:', error);
@@ -47,10 +53,8 @@ export default class Cache {
     }
 
     async stopScheduledUpdates() {
-        if (this.#workerManager) {
-            await this.#workerManager.stop();
-            this.#workerManager = null;
-        }
+        await this.#workerManager?.stop();
+        this.#workerManager = null;
     }
 
     async #updateCache(domain) {
@@ -62,7 +66,6 @@ export default class Cache {
 
         this.#set(domain._id, {
             data: reduceSnapshot(result.data.domain),
-            lastUpdate: domain.lastUpdate,
             version: result.data.domain.version
         });
     }
@@ -71,19 +74,25 @@ export default class Cache {
         for (const update of updates) {
             this.#set(update.domainId, {
                 data: update.data,
-                lastUpdate: update.lastUpdate,
                 version: update.version
             });
         }
     }
 
+    #handleCacheDeletions(deletions) {
+        for (const domainId of deletions) {
+            this.#instance.delete(String(domainId));
+        }
+    }
+
     #handleCacheVersionRequest(domainId) {
         const cached = this.#instance.get(String(domainId));
-        const cachedVersion = cached?.lastUpdate || null;
-        
-        if (this.#workerManager) {
-            this.#workerManager.sendCacheVersionResponse(domainId, cachedVersion);
-        }
+        this.#workerManager.sendCacheVersionResponse(domainId, cached?.version);
+    }
+
+    #handleCachedDomainIdsRequest() {
+        const domainIds = Array.from(this.#instance.keys());
+        this.#workerManager.sendCachedDomainIdsResponse(domainIds);
     }
 
     #set(key, value) {
