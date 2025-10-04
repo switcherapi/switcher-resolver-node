@@ -1,5 +1,5 @@
 import axios from 'axios';
-import https from 'https';
+import https from 'node:https';
 import { StrategiesToRelayDataType, RelayMethods } from '../models/config.js';
 import { checkHttpsAgent } from '../external/switcher-api-facade.js';
 import Logger from '../helpers/logger.js';

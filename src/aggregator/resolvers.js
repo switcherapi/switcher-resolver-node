@@ -14,12 +14,12 @@ export const resolveConfigByKey = async (domain, key) => Config.findOne({ domain
 export function resolveEnvValue(source, field, keys) {
     const arrValue = [];
 
-    keys.forEach(k => {
+    for (const k of keys) {
         arrValue.push({
             env: k,
             value: source[field][k]
         });
-    });
+    }
     
     return arrValue;
 }

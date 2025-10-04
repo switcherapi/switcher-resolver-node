@@ -14,8 +14,8 @@ export async function checkConfig(req, res, next) {
 }
 
 export async function checkConfigComponent(req, res, next) {
-    const hasComponent = req.config.components.filter((c) => 
-        c.toString() === req.componentId.toString()).length > 0;
+    const hasComponent = req.config.components.some((c) => 
+        c.toString() === req.componentId.toString());
 
     if (!hasComponent) {
         return res.status(401).send({ 

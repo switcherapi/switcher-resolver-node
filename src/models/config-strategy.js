@@ -163,7 +163,7 @@ function processPAYLOAD(operation, input, values) {
     const keys = payloadReader(inputJson);
     switch(operation) {
         case OperationsType.HAS_ONE:
-            return keys.filter(key => values.includes(key)).length > 0;
+            return keys.some(key => values.includes(key));
         case OperationsType.HAS_ALL:
             return values.every(element => keys.includes(element));
     }

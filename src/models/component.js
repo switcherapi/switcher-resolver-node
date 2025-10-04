@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import bcryptjs from 'bcryptjs';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import jwt from 'jsonwebtoken';
 import Domain from './domain.js';
 
@@ -41,28 +41,24 @@ const componentSchema = new mongoose.Schema({
 });
 
 componentSchema.methods.generateApiKey = async function () {
-    const component = this;
-
     const apiKey = randomUUID();
     const hash = await bcryptjs.hash(apiKey, EncryptionSalts.COMPONENT);
-    component.apihash = hash;
-    await component.save();
+    this.apihash = hash;
+    await this.save();
     
     return apiKey;
 };
 
 componentSchema.methods.generateAuthToken = async function (environment, rate_limit) {
-    const component = this;
-
     const options = {
         expiresIn: process.env.JWT_CLIENT_TOKEN_EXP_TIME
     };
 
     return jwt.sign(({ 
-        component: component._id,
+        component: this._id,
         environment,
         rate_limit,
-        vc: component.apihash.substring(50, component.apihash.length - 1) 
+        vc: this.apihash.substring(50, this.apihash.length - 1) 
     }), process.env.JWT_SECRET, options);
 };
 

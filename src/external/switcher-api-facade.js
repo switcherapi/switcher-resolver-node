@@ -40,7 +40,7 @@ export async function getRateLimit(key, component) {
         }
     }
 
-    return parseInt(process.env.MAX_REQUEST_PER_MINUTE || DEFAULT_RATE_LIMIT);
+    return Number.parseInt(process.env.MAX_REQUEST_PER_MINUTE || DEFAULT_RATE_LIMIT);
 }
 
 export async function checkHttpsAgent(value) {
