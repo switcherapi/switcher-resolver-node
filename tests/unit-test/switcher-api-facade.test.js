@@ -40,7 +40,7 @@ describe('Testing Switcher API Facade', () => {
             return getRateLimit(component1Key, component1);
         }; 
 
-        await expect(call()).resolves.toBe(parseInt(process.env.MAX_REQUEST_PER_MINUTE));
+        await expect(call()).resolves.toBe(Number.parseInt(process.env.MAX_REQUEST_PER_MINUTE));
     });
 
 });

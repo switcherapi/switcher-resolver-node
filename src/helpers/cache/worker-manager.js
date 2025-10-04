@@ -28,10 +28,10 @@ export const STATUS_TYPE = {
 };
 
 export class CacheWorkerManager {
-    DEFAULT_INTERVAL = 5000;
+    #DEFAULT_INTERVAL = 5000;
+    worker = null;
 
     constructor(eventHandlers, options) {
-        this.worker = null;
         this.status = STATUS_TYPE.STOPPED;
         this.onCacheUpdates = eventHandlers.onCacheUpdates;
         this.onCacheDeletions = eventHandlers.onCacheDeletions;
@@ -40,7 +40,7 @@ export class CacheWorkerManager {
         this.onError = eventHandlers.onError;
         
         this.options = {
-            interval: this.DEFAULT_INTERVAL,
+            interval: this.#DEFAULT_INTERVAL,
             ...options
         };
     }
