@@ -30,14 +30,14 @@ import {
 const changeStrategy = async (strategyId, newOperation, status, environment) => {
     const strategy = await ConfigStrategy.findById(strategyId).exec();
     strategy.operation = newOperation || strategy.operation;
-    strategy.activated.set(environment, status !== undefined ? status : strategy.activated.get(environment));
+    strategy.activated.set(environment, status === undefined ? strategy.activated.get(environment) : status);
     strategy.updatedBy = adminMasterAccountId;
     await strategy.save();
 };
 
 const changeConfigStatus = async (configid, status, environment) => {
     const config = await Config.findById(configid).exec();
-    config.activated.set(environment, status !== undefined ? status : config.activated.get(environment));
+    config.activated.set(environment, status === undefined ? config.activated.get(environment) : status);
     config.updatedBy = adminMasterAccountId;
     await config.save();
 };
@@ -54,14 +54,14 @@ const changeConfigDisableMetricFlag = async (configid, status, environment) => {
 
 const changeGroupConfigStatus = async (groupconfigid, status, environment) => {
     const groupConfig = await GroupConfig.findById(groupconfigid).exec();
-    groupConfig.activated.set(environment, status !== undefined ? status : groupConfig.activated.get(environment));
+    groupConfig.activated.set(environment, status === undefined ? groupConfig.activated.get(environment) : status);
     groupConfig.updatedBy = adminMasterAccountId;
     await groupConfig.save();
 };
 
 const changeDomainStatus = async (domainid, status, environment) => {
     const domain = await Domain.findById(domainid).exec();
-    domain.activated.set(environment, status !== undefined ? status : domain.activated.get(environment));
+    domain.activated.set(environment, status === undefined ? domain.activated.get(environment) : status);
     domain.updatedBy = adminMasterAccountId;
     await domain.save();
 };

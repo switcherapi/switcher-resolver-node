@@ -382,11 +382,11 @@ describe('Processing strategy: DATE', () => {
 
 describe('Processing strategy: REGEX', () => {
     const fixture_values1 = [
-        '\\bUSER_[0-9]{1,2}\\b'
+        String.raw`\bUSER_[0-9]{1,2}\b`
     ];
 
     const fixture_values2 = [
-        '\\bUSER_[0-9]{1,2}\\b', '\\buser-[0-9]{1,2}\\b'
+        String.raw`\bUSER_[0-9]{1,2}\b`, String.raw`\buser-[0-9]{1,2}\b`
     ];
 
     const fixture_values3 = [
