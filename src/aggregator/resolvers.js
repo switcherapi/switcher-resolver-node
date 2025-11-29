@@ -49,7 +49,7 @@ export async function resolveRelay(source, context) {
     const { environment } = context;
 
     if (environment) {
-        if (relay.activated && relay.activated[environment] !== undefined) { 
+        if (relay.activated?.[environment] !== undefined) { 
             return relay;
         }
 

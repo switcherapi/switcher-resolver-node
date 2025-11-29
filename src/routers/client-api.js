@@ -69,8 +69,8 @@ router.post('/criteria/switchers_check', appAuth, clientLimiter, [
 ], validate, async (req, res) => {
     try {
         const configsFound = await getConfigs({ domain: req.domain, components: req.componentId });
-        const configs = configsFound.map(config => config.key);
-        res.send({ not_found: req.body.switchers.filter(switcher => !configs.includes(String(switcher))) });
+        const configs = new Set(configsFound.map(config => config.key));
+        res.send({ not_found: req.body.switchers.filter(switcher => !configs.has(String(switcher))) });
     } catch (e) {
         res.status(500).send({ error: e.message });
     }
