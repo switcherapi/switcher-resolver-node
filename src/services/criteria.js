@@ -33,22 +33,20 @@ export async function evaluateCriteria(config, context, strategyFilter) {
         reason: 'Success'
     };
 
-    try {
-        checkFlags(config, group, domain, environment);
-        await checkStrategy(context.entry, strategies, environment);
-        await checkRelay(config, environment, context.entry, response);
-    } catch (e) {
-        response.result = false;
-        response.reason = e.message;
-    } finally {
-        const bypassMetric = context.bypassMetric ? context.bypassMetric === 'true' : false;
-        if (!bypassMetric && process.env.METRICS_ACTIVATED === 'true' && 
-            !isMetricDisabled(config, environment)) {
-            addMetrics(context, response);
-        }
+    // Check flags
+    if (!checkFlags(config, environment, response)) {
+        return addMetricsAndReturn(context, config, environment, response);
     }
 
-    return response;
+    // Check strategy
+    if (!(await checkStrategy(context.entry, environment, response))) {
+        return addMetricsAndReturn(context, config, environment, response);
+    }
+
+    // Check relay
+    await checkRelay(config, environment, context.entry, response);
+
+    return addMetricsAndReturn(context, config, environment, response);
 }
 
 async function findDomain(domainId) {
@@ -63,40 +61,62 @@ async function findConfigStrategies(configId, domainId, strategyFilter) {
     return ConfigStrategy.find({ config: configId, domain: domainId }, strategyFilter).lean();
 }
 
-function checkFlags(config, group, domain, environment) {
+function checkFlags(config, environment, response) {
+    const { domain, group } = response;
+
     if (config.activated[environment] === undefined ? 
         !config.activated[EnvType.DEFAULT] : !config.activated[environment]) {
-        throw new Error('Config disabled');
+        response.result = false;
+        response.reason = 'Config disabled';
+        return false;
     } else if (group.activated[environment] === undefined ? 
         !group.activated[EnvType.DEFAULT] : !group.activated[environment]) {
-        throw new Error('Group disabled');
+        response.result = false;
+        response.reason = 'Group disabled';
+        return false;
     } else if (domain.activated[environment] === undefined ? 
         !domain.activated[EnvType.DEFAULT] : !domain.activated[environment]) {
-        throw new Error('Domain disabled');
+        response.result = false;
+        response.reason = 'Domain disabled';
+        return false;
     }
+
+    return true;
 }
 
-async function checkStrategy(entry, strategies, environment) {
+async function checkStrategy(entry, environment, response) {
+    const { strategies } = response;
+
     if (strategies) {
         for (const strategy of strategies) {
             if (!strategy.activated[environment]) {
                 continue;
             }
             
-            await checkStrategyInput(entry, strategy);
+            if (!(await checkStrategyInput(entry, strategy, response))) {
+                return false;
+            }
         }
     }
+
+    return true;
 }
 
-async function checkStrategyInput(entry, { strategy, operation, values }) {
-    if (entry?.length) {
-        const strategyEntry = entry.filter(e => e.strategy === strategy);
-        if (strategyEntry.length == 0 || !(await processOperation(strategy, operation, strategyEntry[0].input, values))) {
-            throw new Error(`Strategy '${strategy}' does not agree`);
-        }
-    } else {
-        throw new Error(`Strategy '${strategy}' did not receive any input`);
+async function checkStrategyInput(entry, { strategy, operation, values }, response) {
+    if (!entry?.length) {
+        response.result = false;
+        response.reason = `Strategy '${strategy}' did not receive any input`;
+        return false;
     }
+    
+    const strategyEntry = entry.filter(e => e.strategy === strategy);
+    if (strategyEntry.length == 0 || !(await processOperation(strategy, operation, strategyEntry[0].input, values))) {
+        response.result = false;
+        response.reason = `Strategy '${strategy}' does not agree`;
+        return false;
+    }
+    
+    return true;
 }
 
 async function checkRelay(config, environment, entry, response) {
@@ -125,10 +145,21 @@ async function checkRelay(config, environment, entry, response) {
     }
 }
 
-function isMetricDisabled(config, environment) {
-    if (config.disable_metrics[environment] === undefined) {
-        return true;
+function addMetricsAndReturn(context, config, environment, response) {
+    const systemMetricActivated = process.env.METRICS_ACTIVATED === 'true';
+    const bypassMetric = context.bypassMetric ? context.bypassMetric === 'true' : false;
+    
+    if (systemMetricActivated && !bypassMetric && isMetricEnabled(config, environment)) {
+        addMetrics(context, response);
     }
 
-    return config.disable_metrics[environment];
+    return response;
+}
+
+function isMetricEnabled(config, environment) {
+    if (config.disable_metrics[environment] === undefined) {
+        return false;
+    }
+
+    return !config.disable_metrics[environment];
 }
