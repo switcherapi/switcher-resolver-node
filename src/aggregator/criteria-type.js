@@ -1,7 +1,7 @@
 import { GraphQLObjectType, GraphQLString, GraphQLList, GraphQLBoolean, GraphQLNonNull, GraphQLInputObjectType } from 'graphql';
 import { domainType, groupConfigType, strategyType } from './configuration-type.js';
 import { EnvType } from '../models/environment.js';
-import { resolveCriteria } from './resolvers.js';
+import { evaluateCriteria } from '../services/criteria.js';
 
 export const strategyInputType = new GraphQLInputObjectType({
     name: 'StrategyInput',
@@ -66,7 +66,7 @@ export const criteriaType = new GraphQLObjectType({
         response: {
             type: responseType,
             resolve: (source, _params, context) => {
-                return resolveCriteria(source, context);
+                return evaluateCriteria(source, context);
             }
         }
     }
