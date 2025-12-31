@@ -3,10 +3,11 @@ import { body, check, query, header } from 'express-validator';
 import jwt from 'jsonwebtoken';
 import { checkConfig, checkConfigComponent, validate } from '../middleware/validators.js';
 import { appAuth, appGenerateCredentials } from '../middleware/auth.js';
-import { resolveCriteria, findDomain } from '../aggregator/resolvers.js';
 import { getConfigs } from '../services/config.js';
 import { clientLimiter } from '../middleware/limiter.js';
 import { StrategiesType } from '../models/config-strategy.js';
+import { evaluateCriteria } from '../services/criteria.js';
+import { getDomainById } from '../services/domain.js';
 
 const router = new express.Router();
 
@@ -28,7 +29,7 @@ router.post('/criteria', appAuth, clientLimiter, [
 
         const context = { domain, entry, environment, bypassMetric: req.query.bypassMetric, component: req.component };
 
-        const response = await resolveCriteria(req.config, context, 'values description strategy operation activated -_id');
+        const response = await evaluateCriteria(req.config, context, 'values description strategy operation activated -_id');
 
         delete response.domain;
         delete response.group;
@@ -51,7 +52,7 @@ router.get('/criteria/snapshot_check/:version', appAuth, clientLimiter, [
     check('version', 'Wrong value for domain version').isNumeric()
 ], validate, async (req, res) => {
     try {
-        const domain = await findDomain(req.domain);
+        const domain = await getDomainById(req.domain);
         const version = req.params.version;
 
         if (domain.lastUpdate > version) {

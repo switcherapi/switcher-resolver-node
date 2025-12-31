@@ -12,12 +12,10 @@ let getAllDomains = null;
 /**
  * Initialize worker and send ready signal
  */
-(async () => {
-    await initializeWorker();
-    if (dbInitialized) {
-        parentPort.postMessage({ type: EVENT_TYPE.READY });
-    }
-})();
+await initializeWorker();
+if (dbInitialized) {
+    parentPort.postMessage({ type: EVENT_TYPE.READY });
+}
 
 /**
  * Initialize worker by opening database connection and loading services
