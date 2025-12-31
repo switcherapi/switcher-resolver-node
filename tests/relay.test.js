@@ -127,6 +127,42 @@ describe('Testing Switcher Relay', () => {
         expect(req.body.metadata).toEqual({ custom: 'VALUE' });
     });
 
+    test('RELAY_SUITE - Should return failure when validating relay using GET method', async () => {
+        // mock
+        axiosStub = sinon.stub(axios, 'get');
+        
+        // given
+        const mockRelayService = { data: { result: false, reason: 'Failed' } };
+        axiosStub.returns(Promise.resolve(mockRelayService));
+
+        // Setup Switcher
+        const config = await Config.findById(configId).exec();
+        config.relay = bodyRelay(RelayMethods.GET, RelayTypes.VALIDATION);
+        await config.save();
+
+        // test
+        const req = await request(app)
+            .post(`/criteria?key=${keyConfig}&showReason=true&showStrategy=true`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+                entry: [
+                    {
+                        strategy: StrategiesType.VALUE,
+                        input: 'USER_2'
+                    },
+                    {
+                        strategy: StrategiesType.NETWORK,
+                        input: '10.0.0.3'
+                    }
+                ]});
+
+        axiosStub.restore();
+        expect(req.statusCode).toBe(200);
+        expect(req.body.reason).toEqual('Relay does not agree');
+        expect(req.body.result).toBe(false);
+    });
+
+
     test('RELAY_SUITE - Should return success when validating relay using POST method', async () => {
         // mock
         axiosStub = sinon.stub(axios, 'post');
