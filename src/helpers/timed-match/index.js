@@ -1,75 +1,99 @@
-import cp from 'node:child_process';
 import path from 'node:path';
+import { Worker } from 'node:worker_threads';
 import { fileURLToPath } from 'node:url';
+
+import tryMatch from '../timed-match/match.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /**
- * This class will run a match operation using a child process.
+ * This class will run a match operation using a Worker Thread.
+ *
  * Workers should be killed given a specified (3000 ms default) time limit.
+ *
  * Blacklist caching is available to prevent sequence of matching failures and resource usage.
  */
 export default class TimedMatch {
-    static _worker = this._createChildProcess();
-    static _blacklisted = [];
-    static _maxBlackListed = process.env.REGEX_MAX_BLACKLIST || 50;
-    static _maxTimeLimit = process.env.REGEX_MAX_TIMEOUT || 3000;
+    static #worker = undefined;
+    static #workerActive = false;
+    static #blacklisted = [];
+    static #maxBlackListed = process.env.REGEX_MAX_BLACKLIST || 50;
+    static #maxTimeLimit = process.env.REGEX_MAX_TIMEOUT || 3000;
 
     /**
-     * Run match using child process
+     * Initialize Worker process for working with Regex process operators
+     */
+    static initializeWorker() {
+        this.#worker = this.#createWorker();
+        this.#workerActive = true;
+    }
+
+    /**
+     * Gracefully terminate worker
+     */
+    static terminateWorker() {
+        this.#worker?.terminate();
+        this.#workerActive = false;
+    }
+
+    /**
+     * Executes regex matching operation with timeout protection.
+     *
+     * If a worker is initialized and active, the operation runs in a separate worker thread
+     * with timeout protection to prevent runaway regex operations. Uses SharedArrayBuffer
+     * for synchronous communication between main thread and worker.
+     *
+     * If no worker is available, falls back to direct execution on the main thread.
+     *
+     * Failed operations (timeouts, errors) are automatically added to a blacklist to
+     * prevent repeated attempts with the same problematic patterns.
      * 
      * @param {*} values array of regular expression to be evaluated
      * @param {*} input to be matched
      * @returns match result
      */
-    static async tryMatch(values, input) {
-        let result = false;
-        let timer, resolveListener;
+    static tryMatch(values, input) {
+        if (this.#worker && this.#workerActive) {
+            return this.#safeMatch(values, input);
+        }
 
-        if (this._isBlackListed({ values, input })) {
+        return tryMatch(values, input);
+    }
+    
+    /**
+     * Run match using Node.js Worker Threads API.
+     * 
+     * @param {*} values array of regular expression to be evaluated
+     * @param {*} input to be matched
+     * @returns match result
+     */
+    static #safeMatch(values, input) {
+        if (this.#isBlackListed(values, input)) {
             return false;
         }
-    
-        const matchPromise = new Promise((resolve) => {
-            resolveListener = resolve;
-            this._worker.on('message', resolveListener);
-            this._worker.send({ values, input });
-        });
-    
-        const matchTimer = new Promise((resolve) => {
-            timer = setTimeout(() => {
-                this._resetWorker({ values, input });
-                resolve(false);
-            }, this._maxTimeLimit);
-        });
-    
-        await Promise.race([matchPromise, matchTimer]).then((value) => {
-            this._worker.off('message', resolveListener);
-            clearTimeout(timer);
-            result = value;
-        });
-    
-        return result;
+
+        // Create a SharedArrayBuffer for communication
+        const sharedBuffer = new SharedArrayBuffer(4);
+        const int32Array = new Int32Array(sharedBuffer);
+        
+        // Send parameters to worker using postMessage (Worker Threads API)
+        this.#worker.postMessage({ values, input, sharedBuffer });
+        
+        // Wait for worker to complete or timeout
+        const result = Atomics.wait(int32Array, 0, 0, this.#maxTimeLimit);
+        
+        if (result === 'timed-out') {
+            this.#resetWorker(values, input);
+            return false;
+        }
+        
+        // Get the actual result from the shared buffer
+        return Atomics.load(int32Array, 0) === 1;
     }
 
-    /**
-     * Clear entries from failed matching operations
-     */
-    static clearBlackList() {
-        this._blacklisted = [];
-    }
-
-    static setMaxBlackListed(value) {
-        this._maxBlackListed = value;
-    }
-
-    static setMaxTimeLimit(value) {
-        this._maxTimeLimit = value;
-    }
-
-    static _isBlackListed({ values, input }) {
-        const bls = this._blacklisted.filter(bl =>
+    static #isBlackListed(values, input) {
+        const bls = this.#blacklisted.filter(bl =>
             // input can contain same segment that could fail matching operation 
             (bl.input.includes(input) || input.includes(bl.input)) && 
             // regex order should not affect 
@@ -85,27 +109,39 @@ export default class TimedMatch {
      * 
      * @param {*} param0 list of regex and input 
      */
-    static _resetWorker({ values, input }) {
-        this._worker.kill();
-        this._worker = this._createChildProcess();
+    static #resetWorker(values, input) {
+        this.#worker.terminate();
+        this.#worker = this.#createWorker();
 
-        if (this._blacklisted.length == this._maxBlackListed) {
-            this._blacklisted.splice(0, 1);
+        if (this.#blacklisted.length == this.#maxBlackListed) {
+            this.#blacklisted.splice(0, 1);
         }
 
-        this._blacklisted.push({
+        this.#blacklisted.push({
             res: values,
             input
         });
     }
     
-    static _createChildProcess() {
-        const match_proc = cp.fork(`${__dirname}/match-proc.js`, {
-            stdio: 'ignore'
-        });
+    static #createWorker() {
+        const match_proc = new Worker(`${__dirname}/match-proc.js`);
         
         match_proc.unref();
-        match_proc.channel.unref();
         return match_proc;
+    }
+    
+    /**
+     * Clear entries from failed matching operations
+     */
+    static clearBlackList() {
+        this.#blacklisted = [];
+    }
+
+    static setMaxBlackListed(value) {
+        this.#maxBlackListed = value;
+    }
+
+    static setMaxTimeLimit(value) {
+        this.#maxTimeLimit = value;
     }
 }

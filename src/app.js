@@ -9,11 +9,20 @@ import './db/mongoose.js';
 import mongoose from 'mongoose';
 import swaggerDocument from './api-docs/swagger-document.js';
 import clientApiRouter from './routers/client-api.js';
+import TimedMatch from './helpers/timed-match/index.js';
 import schema from './aggregator/schema.js';
 import { appAuth, resourcesAuth } from './middleware/auth.js';
 import { clientLimiter, defaultLimiter } from './middleware/limiter.js';
 import { createServer } from './app-server.js';
 
+/**
+ * Initialize TimedMatch Worker
+ */
+TimedMatch.initializeWorker();
+
+/**
+ * Express app instance
+ */
 const app = express();
 app.use(express.json());
 
@@ -32,7 +41,6 @@ app.use(clientApiRouter);
 /**
  * GraphQL Routes
  */
-
 const handler = (req, res, next) => 
     createHandler({ schema, context: req })(req, res, next);
 
@@ -42,7 +50,6 @@ app.use('/graphql', appAuth, clientLimiter, handler);
 /**
  * API Docs and Health Check
  */
-
 app.use('/api-docs', resourcesAuth(),
     swaggerUi.serve, 
     swaggerUi.setup(swaggerDocument)

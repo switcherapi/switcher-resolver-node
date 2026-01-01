@@ -39,7 +39,7 @@ export async function evaluateCriteria(config, context, strategyFilter) {
     }
 
     // Check strategy
-    if (!(await checkStrategy(context.entry, environment, response))) {
+    if (!checkStrategy(context.entry, environment, response)) {
         return addMetricsAndReturn(context, config, environment, response);
     }
 
@@ -84,7 +84,7 @@ function checkFlags(config, environment, response) {
     return true;
 }
 
-async function checkStrategy(entry, environment, response) {
+function checkStrategy(entry, environment, response) {
     const { strategies } = response;
 
     if (strategies) {
@@ -93,7 +93,7 @@ async function checkStrategy(entry, environment, response) {
                 continue;
             }
             
-            if (!(await checkStrategyInput(entry, strategy, response))) {
+            if (!checkStrategyInput(entry, strategy, response)) {
                 return false;
             }
         }
@@ -102,7 +102,7 @@ async function checkStrategy(entry, environment, response) {
     return true;
 }
 
-async function checkStrategyInput(entry, { strategy, operation, values }, response) {
+function checkStrategyInput(entry, { strategy, operation, values }, response) {
     if (!entry?.length) {
         response.result = false;
         response.reason = `Strategy '${strategy}' did not receive any input`;
@@ -110,7 +110,7 @@ async function checkStrategyInput(entry, { strategy, operation, values }, respon
     }
     
     const strategyEntry = entry.filter(e => e.strategy === strategy);
-    if (strategyEntry.length == 0 || !(await processOperation(strategy, operation, strategyEntry[0].input, values))) {
+    if (strategyEntry.length == 0 || !processOperation(strategy, operation, strategyEntry[0].input, values)) {
         response.result = false;
         response.reason = `Strategy '${strategy}' does not agree`;
         return false;
