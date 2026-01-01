@@ -26,7 +26,7 @@ export const OperationsType = Object.freeze({
     HAS_ALL: 'HAS_ALL'
 });
 
-export async function processOperation(strategy, operation, input, values) {
+export function processOperation(strategy, operation, input, values) {
     switch(strategy) {
         case StrategiesType.NETWORK:
             return processNETWORK(operation, input, values);
@@ -141,16 +141,16 @@ function processDATE(operation, input, values) {
     }
 }
 
-async function processREGEX(operation, input, values) {
+function processREGEX(operation, input, values) {
     switch(operation) {
         case OperationsType.EXIST:
-            return await TimedMatch.tryMatch(values, input);
+            return TimedMatch.tryMatch(values, input);
         case OperationsType.NOT_EXIST:
-            return !(await processREGEX(OperationsType.EXIST, input, values));
+            return !processREGEX(OperationsType.EXIST, input, values);
         case OperationsType.EQUAL:
-            return await TimedMatch.tryMatch([String.raw`\b${values[0]}\b`], input);
+            return TimedMatch.tryMatch([String.raw`\b${values[0]}\b`], input);
         case OperationsType.NOT_EQUAL:
-            return !(await TimedMatch.tryMatch([String.raw`\b${values[0]}\b`], input));
+            return !TimedMatch.tryMatch([String.raw`\b${values[0]}\b`], input);
     }
 }
 
