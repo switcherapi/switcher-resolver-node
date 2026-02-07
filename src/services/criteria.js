@@ -64,20 +64,18 @@ async function findConfigStrategies(configId, domainId, strategyFilter) {
 function checkFlags(config, environment, response) {
     const { domain, group } = response;
 
-    if (config.activated[environment] === undefined ? 
-        !config.activated[EnvType.DEFAULT] : !config.activated[environment]) {
-        response.result = false;
-        response.reason = 'Config disabled';
+    if (!isFlagEnabled(config, environment)) {
+        buildDisabled(response, 'Config disabled');
         return false;
-    } else if (group.activated[environment] === undefined ? 
-        !group.activated[EnvType.DEFAULT] : !group.activated[environment]) {
-        response.result = false;
-        response.reason = 'Group disabled';
+    } 
+    
+    if (!isFlagEnabled(group, environment)) {
+        buildDisabled(response, 'Group disabled');
         return false;
-    } else if (domain.activated[environment] === undefined ? 
-        !domain.activated[EnvType.DEFAULT] : !domain.activated[environment]) {
-        response.result = false;
-        response.reason = 'Domain disabled';
+    } 
+    
+    if (!isFlagEnabled(domain, environment)) {
+        buildDisabled(response, 'Domain disabled');
         return false;
     }
 
@@ -87,7 +85,7 @@ function checkFlags(config, environment, response) {
 function checkStrategy(entry, environment, response) {
     const { strategies } = response;
 
-    if (strategies) {
+    if (strategies?.length) {
         for (const strategy of strategies) {
             if (!strategy.activated[environment]) {
                 continue;
@@ -104,15 +102,13 @@ function checkStrategy(entry, environment, response) {
 
 function checkStrategyInput(entry, { strategy, operation, values }, response) {
     if (!entry?.length) {
-        response.result = false;
-        response.reason = `Strategy '${strategy}' did not receive any input`;
+        buildDisabled(response, `Strategy '${strategy}' did not receive any input`);
         return false;
     }
     
-    const strategyEntry = entry.filter(e => e.strategy === strategy);
-    if (strategyEntry.length == 0 || !processOperation(strategy, operation, strategyEntry[0].input, values)) {
-        response.result = false;
-        response.reason = `Strategy '${strategy}' does not agree`;
+    const strategyEntry = entry.find(e => e.strategy === strategy);
+    if (!strategyEntry || !processOperation(strategy, operation, strategyEntry.input, values)) {
+        buildDisabled(response, `Strategy '${strategy}' does not agree`);
         return false;
     }
     
@@ -137,10 +133,9 @@ async function checkRelay(config, environment, entry, response) {
             }
         }
     } catch (e) {
+        Logger.error(response.reason, e);
         if (config.relay.type === RelayTypes.VALIDATION) {
-            response.result = false;
-            response.reason = `Relay service could not be reached: ${e.message}`;
-            Logger.error(response.reason, e);
+            buildDisabled(response, `Relay service could not be reached: ${e.message}`);
         }
     }
 }
@@ -162,4 +157,14 @@ function isMetricEnabled(config, environment) {
     }
 
     return !config.disable_metrics[environment];
+}
+
+function isFlagEnabled(flag, environment) {
+    return flag.activated[environment] === undefined ? 
+        flag.activated[EnvType.DEFAULT] : flag.activated[environment];
+}
+
+function buildDisabled(response, reason) {
+    response.result = false;
+    response.reason = reason;
 }

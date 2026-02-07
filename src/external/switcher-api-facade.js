@@ -12,15 +12,14 @@ const certPath = process.env.SSL_CERT;
 const component = 'switcherapi';
 
 Client.buildContext({ url, apiKey, domain: domainName, component, environment }, { logger, certPath });
+const switcher = Client.getSwitcher();
 
 export const SwitcherKeys = Object.freeze({
     RATE_LIMIT: 'RATE_LIMIT',
     HTTPS_AGENT: 'HTTPS_AGENT'
 });
 
-function getFeatureFlag(feature) {
-    const switcher = Client.getSwitcher(feature);
-
+function switcherSettings() {
     if (throttle) {
         switcher.throttle(throttle);
     }
@@ -31,9 +30,9 @@ function getFeatureFlag(feature) {
 export async function getRateLimit(key, component) {
     if (process.env.SWITCHER_API_ENABLE === 'true' && key !== process.env.SWITCHER_API_KEY) {
         const domain = await getDomainById(component.domain);
-        const featureFlag = await getFeatureFlag(SwitcherKeys.RATE_LIMIT)
+        const featureFlag = await switcherSettings()
             .checkValue(String(domain.owner))
-            .isItOn();
+            .isItOn(SwitcherKeys.RATE_LIMIT);
 
         if (featureFlag.result) {
             return featureFlag.metadata.rate_limit;
@@ -48,7 +47,7 @@ export async function checkHttpsAgent(value) {
         return;
     }
 
-    return getFeatureFlag(SwitcherKeys.HTTPS_AGENT)
+    return switcherSettings()
         .checkRegex(value)
-        .isItOn();
+        .isItOn(SwitcherKeys.HTTPS_AGENT);
 }
