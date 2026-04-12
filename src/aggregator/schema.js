@@ -22,7 +22,7 @@ const queryType = new GraphQLObjectType({
             resolve: async (_source, { key, entry, bypassMetric }, context) => {
                 context.entry = entry;
                 context.bypassMetric = bypassMetric;
-                return resolveConfigByKey(context.domain, key);
+                return resolveConfigByKey(context.domain, key.toString());
             }
         },
         domain: {
@@ -45,8 +45,8 @@ const queryType = new GraphQLObjectType({
                 }
             },
             resolve: async (_source, { activated, environment, _component }, context) => {
-                if (environment) context.environment = environment;
-                if (_component) context._component = _component;
+                if (environment) context.environment = environment.toString();
+                if (_component) context._component = _component.toString();
                 return resolveDomain(activated, context);
             }
         }

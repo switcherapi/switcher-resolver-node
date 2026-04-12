@@ -24,8 +24,8 @@ export async function resolveConfigStrategy(source, _id, strategy, operation, ac
     const args = {};
 
     if (_id) { args._id = new Types.ObjectId(_id.toString()); }
-    if (strategy) { args.strategy = Object.values(StrategiesType).find(t => t === strategy); }
-    if (operation) { args.operation = Object.values(OperationsType).find(t => t === operation); }
+    if (strategy) { args.strategy = Object.values(StrategiesType).find(t => t === strategy.toString()); }
+    if (operation) { args.operation = Object.values(OperationsType).find(t => t === operation.toString()); }
     
     let strategies = await ConfigStrategy.find({ config: source._id, ...args }).lean().exec();
     const environment = context.environment;
