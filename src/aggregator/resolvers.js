@@ -1,7 +1,8 @@
+import { Types } from 'mongoose';
 import Domain from '../models/domain.js';
 import GroupConfig from '../models/group-config.js';
 import { Config} from '../models/config.js';
-import { ConfigStrategy } from '../models/config-strategy.js';
+import { ConfigStrategy, OperationsType, StrategiesType } from '../models/config-strategy.js';
 import Component from '../models/component.js';
 
 export const resolveConfigByKey = async (domain, key) => Config.findOne({ domain, key }, null, { lean: true });
@@ -22,9 +23,9 @@ export function resolveEnvValue(source, field, keys) {
 export async function resolveConfigStrategy(source, _id, strategy, operation, activated, context) {
     const args = {};
 
-    if (_id) { args._id = _id; }
-    if (strategy) { args.strategy = strategy; }
-    if (operation) { args.operation = operation; }
+    if (_id) { args._id = new Types.ObjectId(_id.toString()); }
+    if (strategy) { args.strategy = Object.values(StrategiesType).find(t => t === strategy); }
+    if (operation) { args.operation = Object.values(OperationsType).find(t => t === operation); }
     
     let strategies = await ConfigStrategy.find({ config: source._id, ...args }).lean().exec();
     const environment = context.environment;
@@ -57,8 +58,8 @@ export async function resolveRelay(source, context) {
 export async function resolveConfig(source, _id, key, activated, context) {
     const args = {};
 
-    if (_id) { args._id = _id; }
-    if (key) { args.key = key; }
+    if (_id) { args._id = new Types.ObjectId(_id.toString()); }
+    if (key) { args.key = key.toString(); }
     if (context._component) { args.components = context._component; }
 
     let configs = await Config.find({ group: source._id, ...args }).lean().exec();
@@ -73,8 +74,8 @@ export async function resolveConfig(source, _id, key, activated, context) {
 export async function resolveGroupConfig(source, _id, name, activated, context) {
     const args = {};
 
-    if (_id) { args._id = _id; }
-    if (name) { args.name = name; }
+    if (_id) { args._id = new Types.ObjectId(_id.toString()); }
+    if (name) { args.name = name.toString(); }
 
     let groups = await GroupConfig.find({ domain: source._id, ...args }).lean().exec();
 
