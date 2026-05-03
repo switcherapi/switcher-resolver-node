@@ -22,7 +22,17 @@ export default class Cache {
         return Cache.instance;
     }
 
+    isEnabled() {
+        return process.env.CACHE_SNAPSHOT_MS !== undefined;
+    }
+
     async initializeCache() {
+        if (!this.isEnabled()) {
+            Logger.info('Cache is disabled. Skipping cache initialization.');
+            return;
+        }
+
+        Logger.info('Cache is enabled. Initializing cache...');
         const domains = await getAllDomains();
 
         for (const domain of domains) {
@@ -30,7 +40,16 @@ export default class Cache {
         }
     }
 
+    async refreshDomain(domainId) {
+        await this.#updateCache({ _id: domainId });
+    }
+
     async startScheduledUpdates(options = {}) {
+        if (!this.isEnabled()) {
+            Logger.info('Cache is disabled. Skipping scheduled updates.');
+            return;
+        }
+
         this.#workerManager = new CacheWorkerManager({
             onCacheUpdates: (updates) => this.#handleCacheUpdates(updates),
             onCacheDeletions: (deletions) => this.#handleCacheDeletions(deletions),
@@ -90,7 +109,7 @@ export default class Cache {
     }
     
     status() {
-        return this.#workerManager.getStatus();
+        return this.#workerManager?.getStatus();
     }
 
     get(key) {

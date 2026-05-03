@@ -10,6 +10,7 @@ import mongoose from 'mongoose';
 import swaggerDocument from './api-docs/swagger-document.js';
 import clientApiRouter from './routers/client-api.js';
 import TimedMatch from './helpers/timed-match/index.js';
+import Cache from './helpers/cache/index.js';
 import schema from './aggregator/schema.js';
 import { appAuth, resourcesAuth } from './middleware/auth.js';
 import { clientLimiter, defaultLimiter } from './middleware/limiter.js';
@@ -19,6 +20,13 @@ import { createServer } from './app-server.js';
  * Initialize TimedMatch Worker
  */
 TimedMatch.initializeWorker();
+
+/**
+ * Initialize cache
+ */
+const cache = Cache.getInstance();
+await cache.initializeCache();
+cache.startScheduledUpdates({ interval: Number.parseInt(process.env.CACHE_SNAPSHOT_MS) });
 
 /**
  * Express app instance
@@ -77,7 +85,8 @@ app.get('/check', defaultLimiter, (req, res) => {
             metrics: process.env.METRICS_ACTIVATED,
             max_rpm: process.env.MAX_REQUEST_PER_MINUTE,
             regex_max_timeout: process.env.REGEX_MAX_TIMEOUT,
-            regex_max_blacklist: process.env.REGEX_MAX_BLACKLIST
+            regex_max_blacklist: process.env.REGEX_MAX_BLACKLIST,
+            cache_snapshot_ms: process.env.CACHE_SNAPSHOT_MS,
         };
     }
 

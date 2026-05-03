@@ -100,27 +100,27 @@ export const relayType = new GraphQLObjectType({
             }
         },
         verifiedByEnv: {
-            type: new GraphQLList(envValue),
+            type: new GraphQLList(envStatus),
             resolve: (source) => {
-                return resolveEnvValue(source, 'verified', Object.keys(source.verified));
+                return resolveEnvValue(source, 'verified', Object.keys(source.verified || {}));
             }
         },
         endpointByEnv: {
             type: new GraphQLList(envValue),
             resolve: (source) => {
-                return resolveEnvValue(source, 'endpoint', Object.keys(source.endpoint));
+                return resolveEnvValue(source, 'endpoint', Object.keys(source.endpoint || {}));
             }
         },
         statusByEnv: {
             type: new GraphQLList(envStatus),
             resolve: (source) => {
-                return resolveEnvValue(source, 'activated', Object.keys(source.activated));
+                return resolveEnvValue(source, 'activated', Object.keys(source.activated || {}));
             }
         },
         authTokenByEnv: {
             type: new GraphQLList(envValue),
             resolve: (source) => {
-                return resolveEnvValue(source, 'auth_token', Object.keys(source.auth_token));
+                return resolveEnvValue(source, 'auth_token', Object.keys(source.auth_token || {}));
             }
         },
         authPrefix: {
@@ -172,6 +172,12 @@ export const configType = new GraphQLObjectType({
             type: relayType,
             resolve: (source, _args, context) => {
                 return resolveRelay(source, context);
+            }
+        },
+        disableMetricsByEnv: {
+            type: new GraphQLList(envStatus),
+            resolve: (source) => {
+                return resolveEnvValue(source, 'disable_metrics', Object.keys(source.disable_metrics));
             }
         }
     }

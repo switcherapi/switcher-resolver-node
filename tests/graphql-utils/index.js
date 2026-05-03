@@ -5,18 +5,18 @@ const isActivated = (element) => element ? 'true' : 'false';
 export const domainQuery = (where, group, config, strategy) => { 
     const query = `${where.map(createInput)}`;
     const elementQuery = (element) => 
-        element != undefined ? `(activated: ${isActivated(element)})` : '';
+        element == undefined ? '' : `(activated: ${isActivated(element)})`;
 
     return { 
         query: `
             {
                 domain(${query}) { 
                     name version description activated statusByEnv { env value }
-                    group${group !== undefined ? elementQuery(group) : ''} { 
+                    group${group == undefined ? '' : elementQuery(group)} { 
                         name description activated statusByEnv { env value }
-                        config${config !== undefined ? elementQuery(config) : ''} { 
+                        config${config == undefined ? '' : elementQuery(config)} { 
                             key description activated statusByEnv { env value }
-                            strategies${strategy !== undefined ? elementQuery(strategy): ''} { 
+                            strategies${strategy == undefined ? '' : elementQuery(strategy)} { 
                                 strategy activated operation values
                             }
                             relay {

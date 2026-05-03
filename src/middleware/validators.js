@@ -1,5 +1,6 @@
 import { validationResult } from 'express-validator';
 import { getConfig } from '../services/config.js';
+import Cache from '../helpers/cache/index.js';
 
 export async function checkConfig(req, res, next) {
     const config = await getConfig({ domain: req.domain, key: String(req.query.key) }, true);
@@ -14,8 +15,9 @@ export async function checkConfig(req, res, next) {
 }
 
 export async function checkConfigComponent(req, res, next) {
+    const cache = Cache.getInstance();
     const hasComponent = req.config.components.some((c) => 
-        c.toString() === req.componentId.toString());
+            c.toString() === (cache.isEnabled() ? req.component.toString() : req.componentId.toString()));
 
     if (!hasComponent) {
         return res.status(401).send({ 

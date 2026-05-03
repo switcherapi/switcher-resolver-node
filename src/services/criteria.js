@@ -1,3 +1,4 @@
+import Cache from '../helpers/cache/index.js';
 import Logger from '../helpers/logger.js';
 import { ConfigStrategy, processOperation } from '../models/config-strategy.js';
 import { RelayTypes } from '../models/config.js';
@@ -7,22 +8,30 @@ import GroupConfig from '../models/group-config.js';
 import { addMetrics } from '../models/metric.js';
 import { isRelayValid, isRelayVerified } from './config.js';
 import { resolveNotification, resolveValidation } from './relay.js';
+import { findConfigStrategiesInCache, findDomainInCache, findGroupInCache } from './snapshot-cache.js';
 
 export async function evaluateCriteria(config, context, strategyFilter) {
     context.config_id = config._id;
     const environment = context.environment;
+    const cache = Cache.getInstance();
     let domain, group, strategies;
 
-    // Fetch domain, group and strategies in parallel
-    await Promise.all([
-        findDomain(context.domain), 
-        findGroup(config), 
-        findConfigStrategies(config._id, context.domain, strategyFilter)
-    ]).then(result => {
-        domain = result[0];
-        group = result[1];
-        strategies = result[2];
-    });
+    if (cache.isEnabled()) {
+        domain = findDomainInCache(cache, context.domain);
+        group = findGroupInCache(cache, context.domain, config.group);
+        strategies = findConfigStrategiesInCache(cache, config.key, context.domain, group?._id);
+    } else {
+        // Fetch domain, group and strategies in parallel
+        await Promise.all([
+            findDomain(context.domain), 
+            findGroup(config), 
+            findConfigStrategies(config._id, context.domain, strategyFilter)
+        ]).then(result => {
+            domain = result[0];
+            group = result[1];
+            strategies = result[2];
+        });
+    }
     
     // Prepare response object
     const response = {
@@ -117,7 +126,7 @@ function checkStrategyInput(entry, { strategy, operation, values }, response) {
 
 async function checkRelay(config, environment, entry, response) {
     try {
-        if (config.relay?.activated[environment]) {
+        if (config.relay?.activated?.[environment]) {
             isRelayValid(config.relay);
             isRelayVerified(config.relay, environment);
             

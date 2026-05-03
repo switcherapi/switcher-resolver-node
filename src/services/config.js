@@ -1,7 +1,14 @@
+import Cache from '../helpers/cache/index.js';
 import { Config } from '../models/config.js';
 import { BadRequestError } from '../exceptions/index.js';
+import { getConfigFromCache } from './snapshot-cache.js';
 
 export async function getConfig(where, lean = false) {
+    const cache = Cache.getInstance();
+    if (cache.isEnabled()) {
+        return getConfigFromCache(cache, where.domain, where.key);
+    }
+
     const query = Config.findOne();
 
     query.where('domain', where.domain);

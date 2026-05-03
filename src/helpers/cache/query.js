@@ -1,15 +1,24 @@
 export const domainQuery = (id) => `
     query {
         domain(_id: "${id}") {
+            _id
             version
+            name
+            description
             statusByEnv { env value }
             group {
+                _id
+                name
+                description
                 statusByEnv { env value }
                 config {
+                    _id
                     key
                     components
                     statusByEnv { env value }
+                    disableMetricsByEnv { env value }
                     strategies {
+                        description
                         strategy
                         operation
                         values
@@ -33,7 +42,7 @@ export const domainQuery = (id) => `
 export function reduceSnapshot(snapshot) {
     const reduced = { ...snapshot };
 
-    reduced.activated = reduced.statusByEnv.reduce((acc, { env, value }) => {
+    reduced.activated = reduced.statusByEnv?.reduce((acc, { env, value }) => {
         acc[env] = value;
         return acc;
     }, {});
@@ -48,7 +57,7 @@ export function reduceSnapshot(snapshot) {
             return config;
         });
 
-        group.activated = group.statusByEnv.reduce((acc, { env, value }) => {
+        group.activated = group.statusByEnv?.reduce((acc, { env, value }) => {
             acc[env] = value;
             return acc;
         }, {});
@@ -61,16 +70,22 @@ export function reduceSnapshot(snapshot) {
 }
 
 function reduceConfig(config) {
-    config.activated = config.statusByEnv.reduce((acc, { env, value }) => {
+    config.activated = config.statusByEnv?.reduce((acc, { env, value }) => {
         acc[env] = value;
         return acc;
     }, {});
     delete config.statusByEnv;
+
+    config.disable_metrics = config.disableMetricsByEnv?.reduce((acc, { env, value }) => {
+        acc[env] = value;
+        return acc;
+    }, {});
+    delete config.disableMetricsByEnv;
 }
 
 function reduceConfigStrategy(config) {
     config.strategies = config.strategies?.map(strategy => {
-        strategy.activated = strategy.statusByEnv.reduce((acc, { env, value }) => {
+        strategy.activated = strategy.statusByEnv?.reduce((acc, { env, value }) => {
             acc[env] = value;
             return acc;
         }, {});
@@ -88,25 +103,25 @@ function reduceRelay(config) {
     config.relay.auth_prefix = config.relay.authPrefix;
     delete config.relay.authPrefix;
 
-    config.relay.activated = config.relay.statusByEnv.reduce((acc, { env, value }) => {
+    config.relay.activated = config.relay.statusByEnv?.reduce((acc, { env, value }) => {
         acc[env] = value;
         return acc;
     }, {});
     delete config.relay.statusByEnv;
 
-    config.relay.endpoint = config.relay.endpointByEnv.reduce((acc, { env, value }) => {
+    config.relay.endpoint = config.relay.endpointByEnv?.reduce((acc, { env, value }) => {
         acc[env] = value;
         return acc;
     }, {});
     delete config.relay.endpointByEnv;
 
-    config.relay.auth_token = config.relay.authTokenByEnv.reduce((acc, { env, value }) => {
+    config.relay.auth_token = config.relay.authTokenByEnv?.reduce((acc, { env, value }) => {
         acc[env] = value;
         return acc;
     }, {});
     delete config.relay.authTokenByEnv;
 
-    config.relay.verified = config.relay.verifiedByEnv.reduce((acc, { env, value }) => {
+    config.relay.verified = config.relay.verifiedByEnv?.reduce((acc, { env, value }) => {
         acc[env] = value;
         return acc;
     }, {});
