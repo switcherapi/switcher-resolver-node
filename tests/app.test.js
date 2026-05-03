@@ -35,3 +35,20 @@ describe('Testing app [REST] ', () => {
     expect(req.statusCode).toBe(404);
   });
 });
+
+describe('Testing app cache startup', () => {
+  beforeAll(() => {
+    process.env.CACHE_SNAPSHOT_MS = '1000';
+  });
+
+  test('APP_SUITE - Should return cache snapshot in health check details', async () => {
+    const req = await request(app)
+      .get('/check?details=1')
+      .expect(200);
+
+    expect(req.statusCode).toBe(200);
+    expect(req.body.status).toEqual('UP');
+    expect(req.body.attributes).toBeDefined();
+    expect(req.body.attributes.cache_snapshot_ms).toEqual('1000');
+  });
+});

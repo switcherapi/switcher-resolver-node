@@ -14,7 +14,10 @@ afterAll(async () => {
 
 describe('Test cache', () => {
 
-    beforeAll(setupDatabase);
+    beforeAll(async () => {
+        process.env.CACHE_SNAPSHOT_MS = '1000';
+        await setupDatabase();
+    });
 
     beforeEach(() => {
         cache = Cache.getInstance();
