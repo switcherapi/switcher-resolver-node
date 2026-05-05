@@ -196,6 +196,8 @@ describe('Testing criteria [GraphQL]', () => {
 
     test('CLIENT_CACHED_SUITE - It will be deactivated on default environment', async () => {
         await changeConfigStatus(configId, false, EnvType.DEFAULT);
+        await Cache.getInstance().refreshDomain(domainId);
+
         const response = await request(app)
             .post('/graphql')
             .set('Authorization', `Bearer ${token}`)
@@ -222,6 +224,8 @@ describe('Testing criteria [GraphQL]', () => {
         qaToken = responseToken.body.token;
 
         await changeConfigStatus(configId, true, 'QA');
+        await Cache.getInstance().refreshDomain(domainId);
+
         const response = await request(app)
             .post('/graphql')
             .set('Authorization', `Bearer ${qaToken}`)
