@@ -4,8 +4,17 @@ import GroupConfig from '../models/group-config.js';
 import { Config} from '../models/config.js';
 import { ConfigStrategy, OperationsType, StrategiesType } from '../models/config-strategy.js';
 import Component from '../models/component.js';
+import Cache from '../helpers/cache/index.js';
+import { getConfigFromCache } from '../services/snapshot-cache.js';
 
-export const resolveConfigByKey = async (domain, key) => Config.findOne({ domain, key }, null, { lean: true });
+export async function resolveConfigByKey(domain, key) {
+    const cache = Cache.getInstance();
+    if (cache.isEnabled()) {
+        return getConfigFromCache(cache, domain, key);
+    }
+    
+    return Config.findOne({ domain, key }, null, { lean: true });
+}
 
 export function resolveEnvValue(source, field, keys) {
     const arrValue = [];
