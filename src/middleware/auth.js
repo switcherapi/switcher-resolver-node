@@ -5,6 +5,7 @@ import { getEnvironmentByDomainAndName } from '../services/environment.js';
 import { responseExceptionSilent } from '../exceptions/index.js';
 import Component from '../models/component.js';
 import { getRateLimit } from '../external/switcher-api-facade.js';
+import Cache from '../helpers/cache/index.js';
 
 export function resourcesAuth() {
     return basicAuth({
@@ -17,12 +18,25 @@ export function resourcesAuth() {
 
 export async function appAuth(req, res, next) {
     try {
+        const cache = Cache.getInstance();
         const token = req.header('Authorization').replace('Bearer ', '');
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const component = await getComponentById(decoded.component);
 
-        if (component?.apihash.substring(50, component.apihash.length - 1) !== decoded.vc) {
+        let component = cache.isComponentCacheEnabled()
+            ? cache.getComponent(decoded.component, getComponentById)
+            : undefined;
+
+        const fromCache = component !== undefined;
+        if (!fromCache) {
+            component = await getComponentById(decoded.component);
+        }
+
+        if (!isTokenValid(component, decoded)) {
             throw new Error('Invalid API token');
+        }
+
+        if (!fromCache && cache.isComponentCacheEnabled()) {
+            cache.refreshComponent(decoded.component, component);
         }
 
         req.token = token;
@@ -62,4 +76,8 @@ export async function appGenerateCredentials(req, res, next) {
     } catch (err) {
         responseExceptionSilent(res, err, 401, 'Invalid token request.');
     }
+}
+
+function isTokenValid(component, decoded) {
+    return component?.apihash.substring(50, component.apihash.length - 1) === decoded.vc;
 }
