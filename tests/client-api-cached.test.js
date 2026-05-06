@@ -80,6 +80,7 @@ const createRequestAuth = async () => {
 beforeAll(async () => {
     await setupDatabase();
     process.env.CACHE_SNAPSHOT_MS = 5000;
+    process.env.CACHE_COMPONENT_MS = 5000;
 });
 
 afterAll(async () => { 
@@ -365,6 +366,7 @@ describe('Testing criteria [REST] ', () => {
         await Cache.getInstance().initializeCache();
         const response = await createRequestAuth();
         token = response.body.token;
+        Cache.getInstance().refreshComponent(component1._id.toString(), component1);
     });
 
     test('CLIENT_CACHED_SUITE - Should return success on a entry-based CRITERIA response', async () => {
@@ -540,6 +542,63 @@ describe('Testing criteria [REST] ', () => {
         expect(req.statusCode).toBe(404);
     });
 
+    test('CLIENT_CACHED_SUITE - Should return stale response on TTL expiry then reject after background cache refresh', async () => {
+        // Seed cache with the current component (this becomes the "stale" entry after key rotation)
+        const componentBeforeRotation = await Component.findById(component1._id);
+        Cache.getInstance().refreshComponent(componentBeforeRotation._id.toString(), componentBeforeRotation);
+
+        // Rotate API key externally (simulates switcher-api rotation — cache NOT updated)
+        const component = await Component.findById(component1._id);
+        const newApiKey = await component.generateApiKey();
+
+        // Force TTL expiry on the cached entry
+        process.env.CACHE_COMPONENT_MS = 1;
+        await new Promise(resolve => setTimeout(resolve, 5));
+
+        // First request after TTL: stale entry returned (old apihash), background refresh fires
+        await request(app)
+            .post(`/criteria?key=${keyConfig}&showReason=true&showStrategy=true`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+                entry: [
+                    { strategy: StrategiesType.VALUE, input: 'USER_1' },
+                    { strategy: StrategiesType.NETWORK, input: '10.0.0.3' }
+                ]})
+            .expect(200);
+
+        // Wait for background refresh to complete
+        await new Promise(resolve => setTimeout(resolve, 200));
+
+        // Restore TTL
+        process.env.CACHE_COMPONENT_MS = 5000;
+
+        // Second request: cache now has new apihash, old token rejected
+        const rejectedResponse = await request(app)
+            .post(`/criteria?key=${keyConfig}&showReason=true&showStrategy=true`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+                entry: [
+                    { strategy: StrategiesType.VALUE, input: 'USER_1' },
+                    { strategy: StrategiesType.NETWORK, input: '10.0.0.3' }
+                ]})
+            .expect(401);
+
+        expect(rejectedResponse.body.error).toEqual('Invalid API token.');
+
+        // Renew token for subsequent tests
+        const renewedTokenResponse = await request(app)
+            .post('/criteria/auth')
+            .set('switcher-api-key', `${newApiKey}`)
+            .send({
+                domain: domainDocument.name,
+                component: component1.name,
+                environment: EnvType.DEFAULT
+            }).expect(200);
+
+        token = renewedTokenResponse.body.token;
+        Cache.getInstance().refreshComponent(component._id.toString(), component);
+    });
+
     test('CLIENT_CACHED_SUITE - Should NOT return due to a API Key change, then it should return after renewing the token', async () => {
         const firstResponse = await request(app)
             .post(`/criteria?key=${keyConfig}&showReason=true&showStrategy=true`)
@@ -563,6 +622,7 @@ describe('Testing criteria [REST] ', () => {
         // Change API Key
         const component = await Component.findById(component1._id);
         const newApiKey = await component.generateApiKey();
+        Cache.getInstance().refreshComponent(component._id.toString(), component);
 
         const secondResponse = await request(app)
             .post(`/criteria?key=${keyConfig}&showReason=true&showStrategy=true`)

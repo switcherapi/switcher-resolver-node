@@ -6,20 +6,23 @@ import { CacheWorkerManager } from './worker-manager.js';
 import Logger from '../logger.js';
 
 export default class Cache {
-    #instance;
+    static #instance;
+    #snapshotCache;
+    #componentCache;
     #workerManager;
 
     constructor() {
-        this.#instance = new Map();
+        this.#snapshotCache = new Map();
+        this.#componentCache = new Map();
         this.#workerManager = null;
     }
 
     static getInstance() {
-        if (!Cache.instance) {
-            Cache.instance = new Cache();
+        if (!Cache.#instance) {
+            Cache.#instance = new Cache();
         }
         
-        return Cache.instance;
+        return Cache.#instance;
     }
 
     isEnabled() {
@@ -90,22 +93,22 @@ export default class Cache {
 
     #handleCacheDeletions(deletions) {
         for (const domainId of deletions) {
-            this.#instance.delete(String(domainId));
+            this.#snapshotCache.delete(String(domainId));
         }
     }
 
     #handleCacheVersionRequest(domainId) {
-        const cached = this.#instance.get(String(domainId));
+        const cached = this.#snapshotCache.get(String(domainId));
         this.#workerManager.sendCacheVersionResponse(domainId, cached?.version);
     }
 
     #handleCachedDomainIdsRequest() {
-        const domainIds = Array.from(this.#instance.keys());
+        const domainIds = Array.from(this.#snapshotCache.keys());
         this.#workerManager.sendCachedDomainIdsResponse(domainIds);
     }
 
     #set(key, value) {
-        this.#instance.set(String(key), value);
+        this.#snapshotCache.set(String(key), value);
     }
     
     status() {
@@ -113,10 +116,40 @@ export default class Cache {
     }
 
     get(key) {
-        return this.#instance.get(String(key));
+        return this.#snapshotCache.get(String(key));
     }
 
     getAll() {
-        return this.#instance;
+        return this.#snapshotCache;
     }
+
+    // Component cache methods
+
+    isComponentCacheEnabled() {
+        return process.env.CACHE_COMPONENT_MS !== undefined;
+    }
+
+    refreshComponent(componentId, componentData) {
+        this.#componentCache.set(String(componentId), {
+            _id: componentId,
+            domain: componentData.domain,
+            name: componentData.name,
+            apihash: componentData.apihash,
+            cachedAt: Date.now()
+        });
+    }
+
+    getComponent(componentId, getComponentByIdfn) {
+        const entry = this.#componentCache.get(String(componentId));
+        if (!entry) return undefined;
+
+        if (Date.now() - entry.cachedAt > Number(process.env.CACHE_COMPONENT_MS)) {
+            getComponentByIdfn(componentId)
+                .then(component => this.refreshComponent(componentId, component))
+                .catch(() => this.#componentCache.delete(String(componentId)));
+        }
+
+        return entry;
+    }
+
 }
