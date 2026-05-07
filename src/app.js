@@ -75,14 +75,15 @@ app.get('/check', defaultLimiter, (req, res) => {
 
     if (showDetails) {
         response.attributes = {
+            version: swaggerDocument.info.version,
             release_time: process.env.RELEASE_TIME,
             env: process.env.ENV,
             db_state: mongoose.connection.readyState,
-            switcherapi: process.env.SWITCHER_API_ENABLE,
-            switcherapi_logger: process.env.SWITCHER_API_LOGGER,
-            relay_bypass_https: process.env.RELAY_BYPASS_HTTPS,
-            relay_bypass_verification: process.env.RELAY_BYPASS_VERIFICATION,
-            metrics: process.env.METRICS_ACTIVATED,
+            switcherapi: isEnabled('SWITCHER_API_ENABLE'),
+            switcherapi_logger: isEnabled('SWITCHER_API_LOGGER'),
+            relay_bypass_https: isEnabled('RELAY_BYPASS_HTTPS'),
+            relay_bypass_verification: isEnabled('RELAY_BYPASS_VERIFICATION'),
+            metrics: isEnabled('METRICS_ACTIVATED'),
             max_rpm: process.env.MAX_REQUEST_PER_MINUTE,
             regex_max_timeout: process.env.REGEX_MAX_TIMEOUT,
             regex_max_blacklist: process.env.REGEX_MAX_BLACKLIST,
@@ -92,5 +93,9 @@ app.get('/check', defaultLimiter, (req, res) => {
 
     res.status(200).send(response);
 });
+
+function isEnabled(feature) {
+    return process.env[feature]?.toLowerCase() === 'true';
+}
 
 export default createServer(app);
