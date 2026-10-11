@@ -131,7 +131,7 @@ async function checkRelay(config, environment, entry, response) {
             isRelayVerified(config.relay, environment);
             
             if (config.relay.type === RelayTypes.NOTIFICATION) {
-                resolveNotification(config.relay, entry, environment);
+                void resolveNotification(config.relay, entry, environment);
             } else {
                 const relayResponse = await resolveValidation(config.relay, entry, environment);
                 
