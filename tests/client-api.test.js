@@ -135,7 +135,7 @@ describe('Testing criteria [GraphQL]', () => {
     });
 
     test('CLIENT_SUITE - Should NOT authenticate invalid component', async () => {
-        await request(app)
+        const response = await request(app)
             .post('/criteria/auth')
             .set('switcher-api-key', `${apiKey}`)
             .send({
@@ -143,10 +143,12 @@ describe('Testing criteria [GraphQL]', () => {
                 component: 'UNKNOWN COMPONENT',
                 environment: EnvType.DEFAULT
             }).expect(401);
+        
+        expect(response.body).toBeDefined();
     });
 
     test('CLIENT_SUITE - Should NOT authenticate invalid environment', async () => {
-        await request(app)
+        const response = await request(app)
             .post('/criteria/auth')
             .set('switcher-api-key', `${apiKey}`)
             .send({
@@ -154,6 +156,8 @@ describe('Testing criteria [GraphQL]', () => {
                 component: component1.name,
                 environment: 'UNKNOWN ENVIRONMENT'
             }).expect(401);
+        
+        expect(response.body).toBeDefined();
     });
 
     test('CLIENT_SUITE - Should NOT return success on a simple CRITERIA response - Bad login input', async () => {
@@ -525,7 +529,7 @@ describe('Testing criteria [REST] ', () => {
     });
 
     test('CLIENT_SUITE - Should NOT return success on a entry-based CRITERIA response - Entry not an array', async () => {
-        await request(app)
+        const response = await request(app)
             .post(`/criteria?key=${keyConfig}&showReason=true&showStrategy=true`)
             .set('Authorization', `Bearer ${token}`)
             .send({
@@ -534,10 +538,12 @@ describe('Testing criteria [REST] ', () => {
                     input: 'USER_1'
                 }})
             .expect(422);
+        
+        expect(response.body).toBeDefined();
     });
 
     test('CLIENT_SUITE - Should NOT return success on a entry-based CRITERIA response - Invalid Strategy', async () => {
-        await request(app)
+        const response = await request(app)
             .post(`/criteria?key=${keyConfig}&showReason=true&showStrategy=true`)
             .set('Authorization', `Bearer ${token}`)
             .send({
@@ -548,10 +554,12 @@ describe('Testing criteria [REST] ', () => {
                     }
                 ]})
             .expect(422);
+        
+        expect(response.body).toBeDefined();
     });
 
     test('CLIENT_SUITE - Should NOT return success on a entry-based CRITERIA response - Missing key', async () => {
-        await request(app)
+        const response = await request(app)
             .post('/criteria?showReason=true&showStrategy=true')
             .set('Authorization', `Bearer ${token}`)
             .send({
@@ -562,6 +570,8 @@ describe('Testing criteria [REST] ', () => {
                     }
                 ]})
             .expect(422);
+        
+        expect(response.body).toBeDefined();
     });
 
     test('CLIENT_SUITE - Should NOT return success on a entry-based CRITERIA response - Component not registered', async () => {
@@ -714,7 +724,7 @@ describe('Testing criteria [REST] ', () => {
     });
 
     test('CLIENT_SUITE - Should NOT return due to invalid API key provided', async () => {
-        await request(app)
+        const response = await request(app)
             .post('/criteria/auth')
             .set('switcher-api-key', 'INVALID_API_KEY')
             .send({
@@ -722,6 +732,8 @@ describe('Testing criteria [REST] ', () => {
                 component: component1.name,
                 environment: EnvType.DEFAULT
             }).expect(401);
+        
+        expect(response.body).toBeDefined();
     });
 
     test('CLIENT_SUITE - Should return that snapshot version is outdated - status = false', async () => {
@@ -794,19 +806,23 @@ describe('Testing criteria [REST] ', () => {
     });
 
     test('CLIENT_SUITE - Should NOT return list of switchers - Invalid body attribute', async () => {
-        await request(app)
+        let response = await request(app)
             .post('/criteria/switchers_check')
             .set('Authorization', `Bearer ${token}`)
             .send({
                 switchers: 'TEST_CONFIG_KEY'
             })
             .expect(422);
+        
+        expect(response.body).toBeDefined();
 
-        await request(app)
+        response = await request(app)
             .post('/criteria/switchers_check')
             .set('Authorization', `Bearer ${token}`)
             .send()
             .expect(422);
+
+        expect(response.body).toBeDefined();
     });
 });
 

@@ -57,7 +57,8 @@ export function addMetrics(context, response) {
         domain: response.domain._id,
         date: Date.now()
     });
-    metric.save();
+    
+    void metric.save();
 }
 
 export const Metric = mongoose.model('Metric', metricSchema);

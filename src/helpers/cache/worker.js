@@ -92,31 +92,28 @@ async function checkForDeletions(domains) {
 }
 
 async function checkForDomainUpdates(domains) {
-    const updates = [];
-    
-    for (const domain of domains) {
+    return (await Promise.all(domains.map(async (domain) => {
         try {
             const cacheCheckResult = await fetchCacheVersion(domain);
             const dbVersion = domain.lastUpdate;
             const cachedVersion = cacheCheckResult;
             
             if (isCacheOutdated(cachedVersion, dbVersion)) {
-                await updateDomainCacheSnapshot(domain, updates);
+                return await updateDomainCacheSnapshot(domain);
             }
         } catch (domainError) {
             Logger.error(`Error processing domain ${domain._id}:`, domainError.message);
             // Continue with next domain instead of failing completely
         }
-    }
-    
-    return updates;
+        return null;
+    }))).filter(Boolean);
 }
 
 function isCacheOutdated(cachedVersion, dbVersion) {
     return !cachedVersion || dbVersion !== cachedVersion;
 }
 
-async function updateDomainCacheSnapshot(domain, updates) {
+async function updateDomainCacheSnapshot(domain) {
     const { graphql } = await import('graphql');
     const { domainQuery, reduceSnapshot } = await import('./query.js');
     const schemaModule = await import('../../aggregator/schema.js');
@@ -128,12 +125,14 @@ async function updateDomainCacheSnapshot(domain, updates) {
     });
 
     if (result.data?.domain) {
-        updates.push({
+        return {
             domainId: domain._id.toString(),
             data: reduceSnapshot(result.data.domain),
             version: result.data.domain.version
-        });
+        };
     }
+
+    return null;
 }
 
 async function fetchCacheVersion(domain) {
