@@ -38,9 +38,7 @@ export default class Cache {
         Logger.info('Cache is enabled. Initializing cache...');
         const domains = await getAllDomains();
 
-        for (const domain of domains) {
-            await this.#updateCache(domain);
-        }
+        await Promise.all(domains.map(domain => this.#updateCache(domain)));
     }
 
     async refreshDomain(domainId) {

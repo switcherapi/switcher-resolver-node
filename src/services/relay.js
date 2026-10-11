@@ -15,9 +15,9 @@ export async function resolveNotification(relay, entry, environment) {
     const header = createHeader(relay.auth_prefix, relay.auth_token, env);
 
     if (relay.method === RelayMethods.GET) {
-        get(url, createParams(entry), header);
+        void get(url, createParams(entry), header);
     } else {
-        post(url, createBody(entry), header);
+        void post(url, createBody(entry), header);
     }
 }
 

@@ -74,7 +74,7 @@ describe('Testing criteria [REST] ', () => {
     });
 
     test('CLIENT_SUITE - Should return error on a payload-entry-based CRITERIA request - object input', async () => {
-        await request(app)
+        const response = await request(app)
             .post(`/criteria?key=${keyConfigPayload}&showReason=true&showStrategy=true`)
             .set('Authorization', `Bearer ${token}`)
             .send({
@@ -85,6 +85,8 @@ describe('Testing criteria [REST] ', () => {
                     }
                 ]})
             .expect(422);
+        
+        expect(response.body).toBeDefined();
     });
 
     test('CLIENT_SUITE - Should return false on an invalid payload-entry-based CRITERIA request', async () => {
