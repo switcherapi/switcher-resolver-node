@@ -36,7 +36,7 @@ export async function resolveConfigStrategy(source, _id, strategy, operation, ac
     if (strategy) { args.strategy = Object.values(StrategiesType).find(t => t === strategy.toString()); }
     if (operation) { args.operation = Object.values(OperationsType).find(t => t === operation.toString()); }
     
-    let strategies = await ConfigStrategy.find({ config: source._id, ...args }).lean().exec();
+    let strategies = await ConfigStrategy.find({ config: source._id.toString(), ...args }).lean().exec();
     const environment = context.environment;
 
     if (environment) {
@@ -71,7 +71,7 @@ export async function resolveConfig(source, _id, key, activated, context) {
     if (key) { args.key = key.toString(); }
     if (context._component) { args.components = context._component; }
 
-    let configs = await Config.find({ group: source._id, ...args }).lean().exec();
+    let configs = await Config.find({ group: source._id.toString(), ...args }).lean().exec();
 
     if (activated !== undefined) {
         configs = configs.filter(config => config.activated[context.environment] === activated);
@@ -86,7 +86,7 @@ export async function resolveGroupConfig(source, _id, name, activated, context) 
     if (_id) { args._id = new Types.ObjectId(_id.toString()); }
     if (name) { args.name = name.toString(); }
 
-    let groups = await GroupConfig.find({ domain: source._id, ...args }).lean().exec();
+    let groups = await GroupConfig.find({ domain: source._id.toString(), ...args }).lean().exec();
 
     if (activated !== undefined) {
         groups = groups.filter(group => group.activated[context.environment] === activated);
@@ -112,11 +112,11 @@ export async function resolveDomain(activated, context) {
  */
 async function resolveComponentsFirst(source, context, groups) {
     if (context._component) {
-        const component = await Component.findOne({ domain: source._id, name: context._component }).exec();
+        const component = await Component.findOne({ domain: source._id.toString(), name: context._component }).exec();
         context._component = component?._id;
         const configCounts = await Promise.all(groups.map(group => Config.find({
-            domain: source._id,
-            group: group._id,
+            domain: source._id.toString(),
+            group: group._id.toString(),
             components: context._component
         }).countDocuments().exec()));
 
