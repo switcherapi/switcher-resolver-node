@@ -33,8 +33,8 @@ Resolver Node for Component Switchers<br>
 
 # Quick start
 
-Open Swagger UI by accessing the URL: http://localhost:3000/api-docs<br>
-Or use Postman by importing either the OpenAPI json from http://localhost:3000/swagger.json or Postman Collection from "requests/Switcher Resolver Node*"
+Open Swagger UI by accessing the URL: http://localhost:3001/api-docs<br>
+Or use Postman by importing either the OpenAPI json from http://localhost:3001/swagger.json or Postman Collection from "requests/Switcher Resolver Node*"
 
 # AI Disclaimer
 

@@ -9,7 +9,7 @@ on:
 jobs:
   build-test:
     name: Build & Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     concurrency: ci-${{ github.ref }}
 
     steps:
@@ -57,7 +57,7 @@ jobs:
   docker:
     name: Publish Docker Image
     needs: [ build-test ]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: success() && github.ref == 'refs/heads/master'
 
     outputs:
@@ -87,7 +87,7 @@ jobs:
   update-kustomize:
     name: Deploy
     needs: [ docker ]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout

@@ -37,7 +37,7 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "axios": "^1.20.0",
+    "axios": "^1.21.0",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "express": "^5.3.0",
@@ -51,7 +51,7 @@
     "jsonwebtoken": "^9.0.3",
     "moment": "^2.31.0",
     "mongodb": "^7.7.0",
-    "mongoose": "^9.11.1",
+    "mongoose": "^9.11.4",
     "pino": "^10.4.0",
     "pino-pretty": "^13.2.0",
     "swagger-ui-express": "^5.0.1",
@@ -60,7 +60,7 @@
   },
   "devDependencies": {
     "env-cmd": "^11.0.0",
-    "eslint": "^10.12.0",
+    "eslint": "^10.13.0",
     "jest": "^30.5.2",
     "jest-sonar-reporter": "^2.0.0",
     "node-notifier": "^11.0.0",

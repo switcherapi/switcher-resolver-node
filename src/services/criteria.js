@@ -67,7 +67,7 @@ async function findGroup(config) {
 }
 
 async function findConfigStrategies(configId, domainId, strategyFilter) {
-    return ConfigStrategy.find({ config: configId, domain: domainId }, strategyFilter).lean();
+    return ConfigStrategy.find({ config: configId.toString(), domain: domainId.toString() }, strategyFilter).lean();
 }
 
 function checkFlags(config, environment, response) {
